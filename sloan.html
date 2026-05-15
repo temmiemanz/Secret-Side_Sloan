@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sloan — Character Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;1,400&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --font-display: 'Syne', sans-serif;
+  --font-body:    'Lora', serif;
+  --font-mono:    'DM Mono', monospace;
+
+  --void:    #05030a;
+  --bg:      #07050e;
+  --bg-card: rgba(10,7,20,.72);
+  --bg-tint: rgba(14,10,26,.68);
+
+  --purple:  #7c3aed;
+  --purple2: #5b21b6;
+  --purple3: #3b0764;
+  --lilac:   #a78bfa;
+  --lavender:#c4b5fd;
+  --ghost:   #e2d9f3;
+  --mist:    #b8b0d4;
+  --plum:    #2e1065;
+
+  --border:    rgba(124,58,237,.14);
+  --border2:   rgba(124,58,237,.26);
+  --border-hot:rgba(167,139,250,.4);
+
+  --text:     #ede8f8;
+  --text-mid: #9d8ec4;
+  --text-dim: #4a3d6e;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+
+body {
+  background: var(--void);
+  font-family: var(--font-body);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ═══════════════════════════════
+   CANVAS — particles + aurora
+   ═══════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* static aurora glow layers behind canvas */
+.aurora {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.aurora-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  animation: drift 12s ease-in-out infinite alternate;
+  opacity: 0;
+  animation-fill-mode: forwards;
+}
+.aurora-blob:nth-child(1) {
+  width: 600px; height: 400px;
+  top: -10%; left: -10%;
+  background: radial-gradient(ellipse, rgba(91,33,182,.22) 0%, transparent 70%);
+  animation-duration: 14s;
+  animation-delay: 0s;
+}
+.aurora-blob:nth-child(2) {
+  width: 500px; height: 350px;
+  top: 20%; right: -8%;
+  background: radial-gradient(ellipse, rgba(124,58,237,.18) 0%, transparent 70%);
+  animation-duration: 11s;
+  animation-delay: -4s;
+}
+.aurora-blob:nth-child(3) {
+  width: 700px; height: 300px;
+  bottom: 10%; left: 20%;
+  background: radial-gradient(ellipse, rgba(59,7,100,.3) 0%, transparent 65%);
+  animation-duration: 16s;
+  animation-delay: -8s;
+}
+.aurora-blob:nth-child(4) {
+  width: 400px; height: 500px;
+  top: 40%; left: 30%;
+  background: radial-gradient(ellipse, rgba(167,139,250,.08) 0%, transparent 65%);
+  animation-duration: 18s;
+  animation-delay: -2s;
+}
+
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1);     opacity: .7; }
+  33%  { transform: translate(40px, -30px) scale(1.05); opacity: 1; }
+  66%  { transform: translate(-20px, 50px) scale(.95); opacity: .8; }
+  100% { transform: translate(60px, 20px) scale(1.08); opacity: .9; }
+}
+
+/* ═══════════════════════════════
+   CONTENT
+   ═══════════════════════════════ */
+.content-wrap {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 680px;
+  padding: clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 1.75rem);
+  display: flex;
+  flex-direction: column;
+  gap: .7rem;
+}
+
+/* ── Ghost glass card ── */
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px) saturate(1.6) brightness(.9);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6) brightness(.9);
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  padding: clamp(.95rem, 3vw, 1.35rem) clamp(1.1rem, 4vw, 1.6rem);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(124,58,237,.04),
+    inset 0 1px 0 rgba(167,139,250,.08),
+    0 8px 40px rgba(0,0,0,.4);
+}
+
+/* shimmer edge */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--lilac), transparent);
+  opacity: .5;
+  animation: shimmer 6s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%   { left: -60%; opacity: 0; }
+  20%  { opacity: .5; }
+  100% { left: 120%; opacity: 0; }
+}
+
+/* inner noise/grain texture */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 180px;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+  opacity: .6;
+}
+
+.sec-label {
+  font-family: var(--font-mono);
+  font-size: clamp(.52rem, 1.4vw, .58rem);
+  letter-spacing: .22em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: clamp(.6rem, 2vw, .9rem);
+}
+
+/* ── Header ── */
+.header-card {
+  background: linear-gradient(135deg, rgba(14,8,28,.85) 0%, rgba(20,10,38,.8) 50%, rgba(10,7,24,.88) 100%);
+  backdrop-filter: blur(24px) saturate(1.8);
+  -webkit-backdrop-filter: blur(24px) saturate(1.8);
+  border: 1px solid var(--border-hot);
+  border-radius: 2px;
+  padding: clamp(1.2rem, 4vw, 1.9rem) clamp(1.1rem, 4vw, 1.7rem);
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    0 0 60px rgba(91,33,182,.12),
+    inset 0 1px 0 rgba(167,139,250,.15),
+    0 16px 60px rgba(0,0,0,.5);
+}
+/* purple top glow line */
+.header-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--purple2) 15%,
+    var(--lilac) 40%,
+    var(--lavender) 55%,
+    var(--lilac) 70%,
+    var(--purple2) 85%,
+    transparent 100%);
+  box-shadow: 0 0 20px rgba(167,139,250,.5);
+}
+/* ghost orb decoration */
+.header-card::after {
+  content: '';
+  position: absolute;
+  right: -40px; top: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(124,58,237,.12) 0%, transparent 65%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulse-orb 5s ease-in-out infinite alternate;
+}
+@keyframes pulse-orb {
+  from { transform: scale(1); opacity: .7; }
+  to   { transform: scale(1.15); opacity: 1; }
+}
+
+.badge-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+
+.char-tag {
+  font-family: var(--font-mono);
+  font-size: clamp(.52rem, 1.4vw, .58rem);
+  letter-spacing: .14em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-bottom: .5rem;
+}
+.char-name {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 6.5vw, 3rem);
+  font-weight: 800;
+  color: var(--ghost);
+  letter-spacing: .02em;
+  line-height: .95;
+  text-shadow:
+    0 0 30px rgba(167,139,250,.5),
+    0 0 60px rgba(124,58,237,.25),
+    0 2px 0 rgba(0,0,0,.6);
+}
+.char-meta {
+  font-family: var(--font-body);
+  font-size: clamp(.68rem, 1.9vw, .78rem);
+  color: var(--text-mid);
+  margin-top: .28rem;
+  font-style: italic;
+}
+.char-meta.tag {
+  font-style: normal;
+  font-family: var(--font-mono);
+  font-size: clamp(.52rem, 1.4vw, .58rem);
+  letter-spacing: .1em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  margin-top: .1rem;
+}
+.badge { text-align: right; flex-shrink: 0; }
+.badge-label {
+  font-family: var(--font-mono);
+  font-size: clamp(.48rem, 1.3vw, .54rem);
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .14em;
+}
+.badge-value {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 6vw, 3rem);
+  font-weight: 800;
+  color: var(--lilac);
+  line-height: .9;
+  margin-top: .1rem;
+  text-shadow:
+    0 0 16px rgba(167,139,250,.7),
+    0 0 40px rgba(124,58,237,.3);
+}
+
+/* ── Rolls ── */
+.rolls-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: clamp(.4rem,1.8vw,.58rem); }
+.roll-card {
+  background: var(--bg-tint);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: .72rem .9rem;
+  display: flex; flex-direction: column; gap: .2rem;
+  position: relative; overflow: hidden;
+}
+.roll-card::before {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 1px;
+}
+.roll-card:nth-child(1)::before { background: var(--purple);  box-shadow: 0 0 6px rgba(124,58,237,.5); }
+.roll-card:nth-child(2)::before { background: var(--lilac);   box-shadow: 0 0 6px rgba(167,139,250,.5); }
+.roll-card:nth-child(3)::before { background: var(--lavender);box-shadow: 0 0 5px rgba(196,181,253,.4); }
+
+.roll-abbr {
+  font-family: var(--font-mono);
+  font-size: clamp(.52rem,1.4vw,.58rem);
+  color: var(--text-dim);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.roll-mod {
+  font-family: var(--font-display);
+  font-size: clamp(.95rem,2.8vw,1.18rem);
+  font-weight: 700;
+  color: var(--ghost);
+  letter-spacing: .02em;
+  line-height: 1.1;
+  margin-top: .08rem;
+}
+.roll-note {
+  font-size: clamp(.58rem,1.6vw,.65rem);
+  color: var(--text-mid);
+  font-style: italic;
+  line-height: 1.4;
+  margin-top: .08rem;
+}
+
+/* ── Abilities ── */
+.abilities-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: clamp(.5rem,2vw,.68rem); }
+.abilities-grid.single { grid-template-columns: 1fr; }
+.ability {
+  background: var(--bg-tint);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: .88rem 1rem;
+  display: flex; flex-direction: column; gap: .42rem;
+  position: relative; overflow: hidden;
+}
+.ability.full { grid-column: 1/-1; }
+
+/* left ghost glow bar */
+.ability::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 1px; height: 100%;
+  background: linear-gradient(180deg, var(--lilac) 0%, var(--purple) 50%, transparent 100%);
+  opacity: .45;
+}
+
+.ability-header { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.ability-tag {
+  font-family: var(--font-mono);
+  font-size: clamp(.46rem,1.2vw,.52rem);
+  color: var(--lavender);
+  background: rgba(91,33,182,.25);
+  border: 1px solid rgba(124,58,237,.35);
+  padding: 2px 8px;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  flex-shrink: 0;
+}
+.ability-name {
+  font-family: var(--font-display);
+  font-size: clamp(.85rem,2.4vw,.98rem);
+  font-weight: 700;
+  color: var(--ghost);
+}
+.ability-desc {
+  font-size: clamp(.63rem,1.8vw,.71rem);
+  color: var(--text-mid);
+  line-height: 1.65;
+  font-style: italic;
+}
+.limits-label {
+  font-family: var(--font-mono);
+  font-size: clamp(.48rem,1.3vw,.54rem);
+  letter-spacing: .18em;
+  color: rgba(167,139,250,.45);
+  text-transform: uppercase;
+  margin-top: .28rem;
+}
+.limit-item { display: flex; gap: .4rem; align-items: flex-start; margin-top: .3rem; }
+.limit-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--purple);
+  margin-top: 5px;
+  flex-shrink: 0;
+  box-shadow: 0 0 5px rgba(124,58,237,.7);
+}
+.limit-text {
+  font-size: clamp(.6rem,1.7vw,.66rem);
+  color: var(--text-mid);
+  line-height: 1.5;
+  font-style: italic;
+}
+.limit-text b { color: var(--text); font-style: normal; }
+
+/* ── Lore ── */
+.lore-block { display: flex; flex-direction: column; gap: .68rem; }
+.lore-text {
+  font-size: clamp(.66rem,1.9vw,.75rem);
+  color: var(--text-mid);
+  line-height: 1.82;
+}
+.lore-text + .lore-text {
+  padding-top: .68rem;
+  border-top: 1px solid rgba(124,58,237,.08);
+}
+.lore-text em  { color: var(--lilac); font-style: italic; }
+.lore-text strong { color: var(--ghost); font-style: normal; }
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: clamp(.48rem,1.3vw,.54rem);
+  color: var(--text-dim);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  padding: .4rem 0 .2rem;
+}
+.footer span {
+  display: inline-block;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--purple);
+  vertical-align: middle;
+  margin: 0 .5rem .06rem;
+  box-shadow: 0 0 6px rgba(124,58,237,.7);
+}
+
+@media(max-width:480px) {
+  .rolls-grid { grid-template-columns: 1fr 1fr; }
+  .abilities-grid { grid-template-columns: 1fr; }
+  .ability.full { grid-column: 1; }
+}
+</style>
+</head>
+<body>
+
+<!-- Aurora blobs -->
+<div class="aurora">
+  <div class="aurora-blob"></div>
+  <div class="aurora-blob"></div>
+  <div class="aurora-blob"></div>
+  <div class="aurora-blob"></div>
+</div>
+
+<!-- Particle canvas -->
+<canvas id="bg-canvas"></canvas>
+
+<div class="content-wrap">
+
+  <!-- Header -->
+  <div class="header-card">
+    <div class="badge-row">
+      <div>
+        <div class="char-tag">// they · she · any //</div>
+        <div class="char-name">Sloan</div>
+        <div class="char-meta">Player: Lex</div>
+        <div class="char-meta tag">Embodiment EGG — Hollow</div>
+      </div>
+      <div class="badge">
+        <div class="badge-label">Level</div>
+        <div class="badge-value">01</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rolls -->
+  <div class="card">
+    <div class="sec-label">rolls</div>
+    <div class="rolls-grid">
+      <div class="roll-card">
+        <div class="roll-abbr">STR</div>
+        <div class="roll-mod">d20 + 2</div>
+        <div class="roll-note">physical attacks and actions</div>
+      </div>
+      <div class="roll-card">
+        <div class="roll-abbr">MND</div>
+        <div class="roll-mod">d20 + 2</div>
+        <div class="roll-note">intellectual and mental actions</div>
+      </div>
+      <div class="roll-card">
+        <div class="roll-abbr">SOL</div>
+        <div class="roll-mod">d20 + 1</div>
+        <div class="roll-note">belief, instinct, willpower</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Abilities -->
+  <div class="card">
+    <div class="sec-label">abilities</div>
+    <div class="abilities-grid">
+
+      <div class="ability full">
+        <div class="ability-header">
+          <span class="ability-tag">active</span>
+          <span class="ability-name">Possession</span>
+        </div>
+        <div class="ability-desc">Sloan vacates her body entirely and enters another person or animal. She sees, hears, and controls them completely while inside. Her body remains where she left it — limp, breathing, vulnerable.</div>
+        <div class="limits-label">limits</div>
+        <div class="limit-item"><div class="limit-dot"></div><div class="limit-text">Her own body is completely unprotected while possessing.</div></div>
+        <div class="limit-item"><div class="limit-dot"></div><div class="limit-text">Cannot possess someone actively resisting with full awareness.</div></div>
+        <div class="limit-item"><div class="limit-dot"></div><div class="limit-text">Forceful removal from a host causes disorientation and a temporary inability to repossess.</div></div>
+        <div class="limit-item"><div class="limit-dot"></div><div class="limit-text"><b>One host at a time</b> — leaving ends control immediately.</div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Lore -->
+  <div class="card">
+    <div class="sec-label">lore</div>
+    <div class="lore-block">
+      <div class="lore-text">Sloan's parents have been addicted since she was little — drugs, alcohol, all of it. Not cruel, just completely absent. The kind of neglect where she could come home at 4am after crawling through abandoned buildings all night and nobody would even look up. <em>Nobody asked. Nobody noticed. Nobody cared.</em></div>
+      <div class="lore-text">She got bullied badly enough in elementary school to remember it years later. Middle school looked like it might be different — she found a friend group, let herself get comfortable, told them things about her home life and what it was actually like. <strong>They left. Then they told everyone.</strong> That was the last time Sloan let anyone that close. She decided it wouldn't happen again and she's held to it.</div>
+      <div class="lore-text">Grades dropped after that. She's smart — she knows she's smart — but she stopped being able to see the point. Why work toward a future she wasn't sure she'd have? So instead she just moved through days, one at a time, no plan, no people. The thing that actually lights her up is urban exploring. Abandoned buildings at 2am, paranormal investigations alone with a camera, stray cats that let her pet them. She feeds every stray animal she finds. She always has something in her pockets for them.</div>
+      <div class="lore-text">She doesn't drink, doesn't smoke, won't touch anything her parents touch. That's a hard line and it doesn't move. She's incredibly awkward when people actually speak to her — which almost never happens, because she won't start it. She compares her problems to everyone else's and usually decides hers aren't serious enough to take up space. She's working on that. Slowly. Mostly by not working on it at all and just going out into the dark with a flashlight looking for something that goes bump. <em>She smells like berries and petrichor and she's wearing a bunny shirt that's falling apart at the seams because she's worn it too many times to count.</em></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    stats update on level up only<span></span>post-collapse 2004<span></span>embodiment egg
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════
+// Floating particle system — ghost orbs
+// inspired by React Bits particle style
+// ═══════════════════════════════════════
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', () => { resize(); init(); });
+
+class Particle {
+  constructor() { this.reset(true); }
+  reset(initial) {
+    this.x  = Math.random() * W;
+    this.y  = initial ? Math.random() * H : H + 20;
+    this.r  = Math.random() * 2.2 + .4;
+    this.vx = (Math.random() - .5) * .25;
+    this.vy = -(Math.random() * .5 + .15);
+    this.life = 0;
+    this.maxLife = Math.random() * 400 + 200;
+    // purple palette
+    const hues = [265, 275, 255, 285, 245];
+    this.hue = hues[Math.floor(Math.random() * hues.length)];
+    this.sat = Math.random() * 30 + 55;
+    this.lum = Math.random() * 25 + 55;
+  }
+  update() {
+    this.x  += this.vx + Math.sin(this.life * .018) * .18;
+    this.y  += this.vy;
+    this.life++;
+    if (this.life > this.maxLife || this.y < -20) this.reset(false);
+  }
+  draw() {
+    const t = this.life / this.maxLife;
+    const alpha = t < .2 ? t / .2 : t > .8 ? (1 - t) / .2 : 1;
+    ctx.beginPath();
+    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 3);
+    grd.addColorStop(0, `hsla(${this.hue},${this.sat}%,${this.lum}%,${alpha * .55})`);
+    grd.addColorStop(1, `hsla(${this.hue},${this.sat}%,${this.lum}%,0)`);
+    ctx.fillStyle = grd;
+    ctx.arc(this.x, this.y, this.r * 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function init() {
+  particles = [];
+  const count = Math.floor((W * H) / 8000);
+  for (let i = 0; i < count; i++) particles.push(new Particle());
+}
+init();
+
+// slow drifting large ghost orbs
+class GhostOrb {
+  constructor() { this.reset(true); }
+  reset(initial) {
+    this.x = Math.random() * W;
+    this.y = initial ? Math.random() * H : H + 100;
+    this.r = Math.random() * 60 + 30;
+    this.vx = (Math.random() - .5) * .12;
+    this.vy = -(Math.random() * .2 + .05);
+    this.life = 0;
+    this.maxLife = Math.random() * 800 + 500;
+    this.hue = Math.random() < .6 ? 265 : 255;
+  }
+  update() {
+    this.x += this.vx + Math.sin(this.life * .008) * .3;
+    this.y += this.vy;
+    this.life++;
+    if (this.life > this.maxLife || this.y < -120) this.reset(false);
+  }
+  draw() {
+    const t = this.life / this.maxLife;
+    const alpha = t < .3 ? t / .3 : t > .7 ? (1 - t) / .3 : 1;
+    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r);
+    grd.addColorStop(0, `hsla(${this.hue},60%,65%,${alpha * .06})`);
+    grd.addColorStop(.5, `hsla(${this.hue},55%,55%,${alpha * .03})`);
+    grd.addColorStop(1, `hsla(${this.hue},50%,50%,0)`);
+    ctx.beginPath();
+    ctx.fillStyle = grd;
+    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+const orbs = [];
+for (let i = 0; i < 8; i++) orbs.push(new GhostOrb());
+
+function frame() {
+  ctx.clearRect(0, 0, W, H);
+  orbs.forEach(o => { o.update(); o.draw(); });
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>
