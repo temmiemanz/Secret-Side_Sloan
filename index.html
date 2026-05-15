@@ -479,7 +479,7 @@ body {
     <div class="rolls-grid">
       <div class="roll-card">
         <div class="roll-abbr">STR</div>
-        <div class="roll-mod">d20 + 2</div>
+        <div class="roll-mod">d20 - 1</div>
         <div class="roll-note">physical attacks and actions</div>
       </div>
       <div class="roll-card">
@@ -489,7 +489,7 @@ body {
       </div>
       <div class="roll-card">
         <div class="roll-abbr">SOL</div>
-        <div class="roll-mod">d20 + 1</div>
+        <div class="roll-mod">d20 + 2</div>
         <div class="roll-note">belief, instinct, willpower</div>
       </div>
     </div>
@@ -520,10 +520,45 @@ body {
   <div class="card">
     <div class="sec-label">lore</div>
     <div class="lore-block">
+
+      <!-- characteristics -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.28rem 2rem;padding-bottom:.9rem;border-bottom:1px solid var(--border);">
+        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">pronouns</span><span style="color:var(--text-mid);">they · she · any</span></div>
+        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">age</span><span style="color:var(--text-mid);">late teens</span></div>
+        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">scent</span><span style="color:var(--text-mid);">berries and petrichor</span></div>
+        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">clothes</span><span style="color:var(--text-mid);">worn bunny shirt, falling apart at the seams</span></div>
+        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;grid-column:1/-1;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">personality</span><span style="color:var(--text-mid);">deeply introverted · won't start conversations · compares her problems to everyone else's and decides they don't count · hard line against anything her parents touch · feeds every stray she finds · always has something in her pockets for them</span></div>
+      </div>
+
       <div class="lore-text">Sloan's parents have been addicted since she was little — drugs, alcohol, all of it. Not cruel, just completely absent. The kind of neglect where she could come home at 4am after crawling through abandoned buildings all night and nobody would even look up. <em>Nobody asked. Nobody noticed. Nobody cared.</em></div>
       <div class="lore-text">She got bullied badly enough in elementary school to remember it years later. Middle school looked like it might be different — she found a friend group, let herself get comfortable, told them things about her home life and what it was actually like. <strong>They left. Then they told everyone.</strong> That was the last time Sloan let anyone that close. She decided it wouldn't happen again and she's held to it.</div>
       <div class="lore-text">Grades dropped after that. She's smart — she knows she's smart — but she stopped being able to see the point. Why work toward a future she wasn't sure she'd have? So instead she just moved through days, one at a time, no plan, no people. The thing that actually lights her up is urban exploring. Abandoned buildings at 2am, paranormal investigations alone with a camera, stray cats that let her pet them. She feeds every stray animal she finds. She always has something in her pockets for them.</div>
       <div class="lore-text">She doesn't drink, doesn't smoke, won't touch anything her parents touch. That's a hard line and it doesn't move. She's incredibly awkward when people actually speak to her — which almost never happens, because she won't start it. She compares her problems to everyone else's and usually decides hers aren't serious enough to take up space. She's working on that. Slowly. Mostly by not working on it at all and just going out into the dark with a flashlight looking for something that goes bump. <em>She smells like berries and petrichor and she's wearing a bunny shirt that's falling apart at the seams because she's worn it too many times to count.</em></div>
+
+      <!-- likes / dislikes -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding-top:.8rem;border-top:1px solid var(--border);">
+        <div>
+          <div style="font-family:var(--font-mono);font-size:.5rem;color:var(--text-dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.35rem;">likes</div>
+          <div style="display:flex;flex-direction:column;gap:.18rem;">
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Urban exploring</div>
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Stray animals</div>
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Paranormal investigation</div>
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>The dark</div>
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Rain</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:var(--font-mono);font-size:.5rem;color:var(--text-dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.35rem;">dislikes</div>
+          <div style="display:flex;flex-direction:column;gap:.18rem;">
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Crowds</div>
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Being noticed</div>
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Alcohol and drugs</div>
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Being spoken to first</div>
+            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Loud spaces</div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -635,6 +670,47 @@ function frame() {
   requestAnimationFrame(frame);
 }
 frame();
+
+// Splash cursor — React Bits style ghost trail
+const trails = [];
+window.addEventListener('mousemove', e => {
+  for (let i = 0; i < 2; i++) {
+    trails.push({
+      x: e.clientX + (Math.random()-0.5)*10,
+      y: e.clientY + (Math.random()-0.5)*10,
+      r: Math.random()*8+3,
+      life: 1,
+      hue: 260 + Math.random()*30,
+    });
+  }
+  if (trails.length > 80) trails.splice(0, trails.length-80);
+});
+// Draw trails on top of existing frame — inject into requestAnimationFrame
+const _origFrame = frame;
+function frameWithTrail() {
+  // trails drawn on bg-canvas after everything else
+  trails.forEach((t,i) => {
+    const grd = ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,t.r);
+    grd.addColorStop(0,`hsla(${t.hue},70%,70%,${t.life*.25})`);
+    grd.addColorStop(1,`hsla(${t.hue},70%,60%,0)`);
+    ctx.beginPath();
+    ctx.arc(t.x,t.y,t.r,0,Math.PI*2);
+    ctx.fillStyle=grd; ctx.fill();
+    t.life -= 0.04; t.r *= 0.96;
+  });
+  trails.splice(0, trails.filter(t=>t.life<=0).length || 0);
+  for(let i=trails.length-1;i>=0;i--){if(trails[i].life<=0)trails.splice(i,1);}
+}
+const originalRAF = requestAnimationFrame;
+// Patch the frame loop
+function frameWithCursor() {
+  ctx.clearRect(0,0,W,H);
+  orbs.forEach(o=>{o.update();o.draw();});
+  particles.forEach(p=>{p.update();p.draw();});
+  frameWithTrail();
+  requestAnimationFrame(frameWithCursor);
+}
+frameWithCursor();
 </script>
 </body>
 </html>
