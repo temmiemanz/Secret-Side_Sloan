@@ -3,714 +3,2144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sloan — Character Sheet</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,400;1,400&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<title>Sloan — Secret Side</title>
 <style>
+
+/* ══════════════════════════════════════════
+   VARIABLES
+   ══════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@400;500&display=swap');
+
 :root {
-  --font-display: 'Syne', sans-serif;
-  --font-body:    'Lora', serif;
-  --font-mono:    'DM Mono', monospace;
-
-  --void:    #05030a;
-  --bg:      #07050e;
-  --bg-card: rgba(10,7,20,.72);
-  --bg-tint: rgba(14,10,26,.68);
-
-  --purple:  #7c3aed;
-  --purple2: #5b21b6;
-  --purple3: #3b0764;
-  --lilac:   #a78bfa;
-  --lavender:#c4b5fd;
-  --ghost:   #e2d9f3;
-  --mist:    #b8b0d4;
-  --plum:    #2e1065;
-
-  --border:    rgba(124,58,237,.14);
-  --border2:   rgba(124,58,237,.26);
-  --border-hot:rgba(167,139,250,.4);
-
-  --text:     #ede8f8;
-  --text-mid: #9d8ec4;
-  --text-dim: #4a3d6e;
+  --bg:           #0a0810;
+  --panel:        #100d1a;
+  --panel2:       #161222;
+  --border:       #1e1830;
+  --border2:      #2a2240;
+  --accent:       #9b6dda;
+  --text:         #d4cce8;
+  --muted:        #3d3458;
+  --dim:          #7a6e9a;
+  --input:        #08060f;
+  --red:          #b84060;
+  --green:        #4a8a7a;
+  --shadow-sm:    0 2px 12px rgba(0,0,0,0.5);
+  --font-main:    'Inter', system-ui, sans-serif;
+  --font-display: 'Cinzel', serif;
+  --radius:       4px;
+  --radius-lg:    8px;
+  --accent2:      #c49ae8;
+  --accent3:      #6040a0;
+  --transition:   0.15s;
 }
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html,body{min-height:100%}
+/* ══════════════════════════════════════════
+   RESET & BASE
+   ══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-main); background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; }
+input, textarea, button, select { font-family: var(--font-main); }
+input[type=number] { -moz-appearance: textfield; }
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
 
-body {
-  background: var(--void);
-  font-family: var(--font-body);
-  color: var(--text);
-  min-height: 100vh;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 0;
-  overflow-x: hidden;
-  position: relative;
+/* ══════════════════════════════════════════
+   LAYOUT
+   ══════════════════════════════════════════ */
+.page { max-width: 760px; margin: 0 auto; padding: 20px 16px 60px; display: flex; flex-direction: column; gap: 12px; }
+
+/* ══════════════════════════════════════════
+   EDIT MODE
+   locked fields are invisible when not editing —
+   they show their value as plain text via ::before
+   trick isn't needed; we use opacity + pointer-events
+   ══════════════════════════════════════════ */
+.edit-bar { display: flex; justify-content: flex-end; }
+.edit-btn {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  padding: 4px 14px; border-radius: 99px; cursor: pointer; transition: all var(--transition);
 }
+.edit-btn:hover, .edit-btn.active { border-color: var(--accent); color: var(--accent); }
 
-/* ═══════════════════════════════
-   CANVAS — particles + aurora
-   ═══════════════════════════════ */
-#bg-canvas {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+/* When NOT editing: locked inputs show value as plain text, no chrome */
+.locked-field {
+  background: none; border: none; outline: none;
+  color: var(--text); cursor: default; pointer-events: none;
+  transition: border-color var(--transition), opacity var(--transition);
+}
+/* underline + cursor appear only in edit mode */
+body.editing .locked-field           { pointer-events: auto; cursor: text; }
+body.editing input.locked-field      { border-bottom: 1px solid var(--border2); }
+body.editing input.locked-field:focus{ border-bottom-color: var(--accent); }
+body.editing select.locked-field     { pointer-events: auto; cursor: pointer; border-bottom: 1px solid var(--border2); }
+body.editing select.locked-field:focus { border-bottom-color: var(--accent); }
+
+/* init bonus buttons */
+.init-adj-btn        { transition: all var(--transition); }
+.init-adj-btn.hidden-ctrl { display: none; }
+
+/* ══════════════════════════════════════════
+   ROLL TOASTS — stacking slide-up notifications
+   ══════════════════════════════════════════ */
+#toastStack {
+  position: fixed; bottom: 76px; left: 24px; z-index: 197;
+  display: flex; flex-direction: column; gap: 6px;
   pointer-events: none;
 }
+.toast-item {
+  background: var(--panel2); border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 8px 14px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.55);
+  min-width: 120px; max-width: 200px;
+  transform: translateY(12px); opacity: 0;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+.toast-item.show { transform: translateY(0); opacity: 1; }
+.toast-item.hide { transform: translateY(-8px); opacity: 0; }
+.toast-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.toast-total-row { display: flex; align-items: baseline; gap: 6px; }
+.toast-total {
+  font-size: 20px; font-weight: 700; color: var(--text); line-height: 1;
+}
+.toast-total.crit { color: #f0c040; }
+.toast-total.fail { color: var(--red); }
+.toast-rolled { font-size: 11px; color: var(--muted); font-weight: 600; }
+.toast-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* static aurora glow layers behind canvas */
-.aurora {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
+/* ══════════════════════════════════════════
+   DICE ROLLER BUTTON + PANEL
+   ══════════════════════════════════════════ */
+#diceBtn {
+  position: fixed; bottom: 24px; left: 24px; z-index: 9999;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--panel2); border: 1px solid var(--border2);
+  color: var(--text); cursor: pointer; font-size: 22px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--shadow-sm); transition: all var(--transition);
+}
+#diceBtn:hover { border-color: var(--accent); color: var(--accent); }
+#diceBtn.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+
+#dicePanel {
+  position: fixed; bottom: 76px; left: 24px; z-index: 9999;
+  background: var(--panel); border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 14px 16px 10px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+  display: none; flex-direction: column; gap: 10px;
+  min-width: 210px;
+}
+#dicePanel.open { display: flex; }
+.dice-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+}
+.dice-die {
+  display: flex; align-items: center; justify-content: center;
+  padding: 7px 4px; border: 1px solid var(--border2); border-radius: var(--radius);
+  cursor: pointer; background: var(--panel2); transition: all var(--transition);
+  position: relative; user-select: none;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+  color: var(--dim); text-transform: uppercase;
+}
+.dice-die:hover { border-color: var(--accent); color: var(--accent); }
+.dice-die.selected { border-color: var(--accent); background: rgba(200,168,75,0.12); color: var(--accent); }
+.dice-die-count {
+  position: absolute; top: -5px; right: -5px;
+  background: var(--accent); color: var(--bg);
+  font-size: 9px; font-weight: 700; border-radius: 99px;
+  min-width: 16px; height: 16px; display: none;
+  align-items: center; justify-content: center; padding: 0 3px;
+}
+.dice-die-count.visible { display: flex; }
+.dice-actions { display: flex; gap: 6px; }
+.dice-roll-btn {
+  flex: 1; padding: 7px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--accent); color: var(--bg); border: none;
+  border-radius: var(--radius); cursor: pointer; transition: filter var(--transition);
+}
+.dice-roll-btn:hover { filter: brightness(1.15); }
+.dice-reset-btn {
+  flex: 1; padding: 7px; font-size: 11px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: none; color: var(--muted); border: 1px solid var(--border2);
+  border-radius: var(--radius); cursor: pointer; transition: all var(--transition);
+}
+.dice-reset-btn:hover { border-color: var(--text); color: var(--text); }
+
+/* ══════════════════════════════════════════
+   CARDS
+   ══════════════════════════════════════════ */
+.card { background: var(--panel); border: 1px solid var(--border2); border-radius: var(--radius-lg); padding: 16px 18px; }
+.card-title {
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--muted); margin-bottom: 12px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border2); display: flex; align-items: center; gap: 8px;
+}
+.card-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ══════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════ */
+.header-grid { display: grid; grid-template-columns: 1fr auto; gap: 10px 20px; align-items: start; }
+
+.char-name-input {
+  font-size: 28px; font-weight: 700; background: none; border: none;
+  border-bottom: 1px solid transparent; color: var(--text); padding: 0;
+  outline: none; width: 100%; line-height: 1.1; transition: border-color var(--transition);
+}
+.char-name-input::placeholder { color: var(--muted); }
+
+.field-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); display: block; margin-bottom: 3px; }
+
+.plain-field {
+  background: none; border: none; border-bottom: 1px solid transparent;
+  color: var(--text); font-size: 13px; padding: 2px 0; outline: none;
+  width: 100%; transition: border-color var(--transition);
+}
+.plain-field::placeholder { color: var(--muted); }
+
+.meta-row  { display: flex; gap: 16px; flex-wrap: wrap; }
+.meta-field { display: flex; flex-direction: column; gap: 2px; }
+.meta-field .plain-field { min-width: 120px; }
+
+.power-line {
+  display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+  font-size: 12px; color: var(--dim); padding-top: 4px; border-top: 1px solid var(--border);
+}
+.power-sep { color: var(--muted); }
+.power-field {
+  background: none; border: none; border-bottom: 1px solid transparent;
+  color: var(--dim); font-size: 12px; padding: 1px 0; outline: none;
+  transition: border-color var(--transition);
+}
+.power-field::placeholder { color: var(--muted); }
+.power-field.pf-name { width: 160px; }
+.power-select {
+  background: none; border: none; border-bottom: 1px solid transparent;
+  color: var(--dim); font-size: 12px; padding: 1px 0; outline: none;
+  -webkit-appearance: none; appearance: none; transition: border-color var(--transition);
+}
+.power-select option { background: var(--panel); color: var(--text); }
+
+/* ══════════════════════════════════════════
+   HP WIDGET
+   ══════════════════════════════════════════ */
+.hp-widget { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; height: 100%; justify-content: space-between; }
+.hp-row-top { display: flex; align-items: center; gap: 6px; }
+.hp-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+.hp-display { display: flex; align-items: center; gap: 4px; }
+.hp-num {
+  font-size: 18px; font-weight: 700; background: none; border: none;
+  border-bottom: 1px solid transparent; color: var(--text); width: 40px;
+  text-align: center; padding: 0; outline: none; line-height: 1;
+  transition: border-color var(--transition);
+}
+.hp-num::placeholder { color: var(--muted); }
+.hp-slash { font-size: 16px; color: var(--muted); }
+.hp-amt {
+  font-size: 11px; background: var(--input); border: 1px solid var(--border2);
+  color: var(--text); width: 28px; text-align: center; padding: 2px 3px;
+  border-radius: var(--radius); outline: none;
+}
+.hp-amt:focus { border-color: var(--accent); }
+.hp-ctrl-btn {
+  font-size: 12px; font-weight: 700; width: 22px; height: 22px;
+  border: 1px solid var(--border2); background: none; border-radius: var(--radius);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition); line-height: 1;
+}
+.hp-ctrl-btn.heal { border-color: var(--green); color: var(--green); }
+.hp-ctrl-btn.dmg  { border-color: var(--red);   color: var(--red); }
+.hp-ctrl-btn:hover { filter: brightness(1.3); }
+.hp-flash { font-size: 10px; font-weight: 700; min-width: 18px; text-align: right; }
+.hp-flash.pos { color: var(--green); }
+.hp-flash.neg { color: var(--red); }
+
+/* ══════════════════════════════════════════
+   LEVEL
+   ══════════════════════════════════════════ */
+.level-row { display: flex; align-items: baseline; justify-content: flex-end; gap: 6px; }
+.level-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); }
+.level-val {
+  font-size: 42px; font-weight: 700; line-height: 1; background: none; border: none;
+  border-bottom: 1px solid transparent; color: var(--accent);
+  width: 64px; text-align: center; padding: 0; outline: none;
+  transition: border-color var(--transition);
+}
+
+/* ══════════════════════════════════════════
+   SIDE COLUMN: INITIATIVE + AC + IMAGE
+   ══════════════════════════════════════════ */
+.rolls-initiative-wrap { display: flex; gap: 12px; align-items: stretch; }
+.side-column { display: flex; flex-direction: column; gap: 12px; width: 120px; flex-shrink: 0; }
+
+.initiative-card { width: 100%; transition: filter var(--transition); }
+.initiative-card:hover { filter: brightness(1.15); }
+.initiative-body {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 0 0 10px;
+}
+/* Big +# modifier — always shown, always signed */
+.init-modifier {
+  font-size: 38px; font-weight: 700; color: var(--accent);
+  text-align: center; line-height: 1; letter-spacing: -1px;
+}
+/* Flash result overlays the modifier briefly */
+.init-result { display: none; }
+.init-bonus-row { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+.init-adj-btn {
+  font-size: 13px; font-weight: 700; width: 18px; height: 18px;
+  border: 1px solid var(--border2); background: none; color: var(--dim);
+  border-radius: var(--radius); cursor: pointer; display: flex;
+  align-items: center; justify-content: center; line-height: 1;
+  transition: all var(--transition);
+}
+.init-adj-btn:hover { border-color: var(--accent); color: var(--accent); }
+.init-bonus-val {
+  font-size: 11px; font-weight: 700; color: var(--muted); min-width: 24px; text-align: center;
+}
+
+/* Stat roll line — whole thing is clickable */
+.stat-roll-line {
+  display: flex; align-items: center; justify-content: center;
+  padding: 5px 14px; border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02); cursor: pointer;
+  transition: background var(--transition);
+}
+.stat-roll-line:hover { background: rgba(200,168,75,0.08); }
+.stat-roll-text { font-size: 12px; font-weight: 700; color: var(--accent); }
+
+/* Skill rows — entire row is the roll button */
+.skill-row {
+  display: flex; align-items: center; padding: 5px 14px; gap: 6px;
+  transition: background var(--transition); cursor: pointer;
+}
+.skill-row:hover { background: rgba(200,168,75,0.08); }
+.skill-name {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--dim); flex: 1; white-space: nowrap;
+}
+.skill-mods { display: flex; align-items: center; gap: 4px; }
+.skill-base-mod { font-size: 12px; font-weight: 700; color: var(--accent); min-width: 20px; text-align: center; }
+.skill-sep { color: var(--border2); font-size: 10px; }
+.prof-val {
+  font-size: 12px; font-weight: 700; background: none; border: none;
+  border-bottom: 1px dashed var(--border2); color: var(--dim); width: 22px;
+  text-align: center; padding: 0; outline: none; transition: border-color var(--transition);
+  cursor: text;
+}
+.prof-val:focus { border-bottom-color: var(--accent); }
+.prof-label { font-size: 9px; color: var(--muted); letter-spacing: 0.05em; }
+/* Roll result — left side of row, small, fades in */
+.roll-result { display: none; }
+
+/* AC — just the number, override only visible in edit mode */
+.ac-card { }
+.ac-body { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px 0 6px; }
+.ac-derived {
+  font-size: 40px; font-weight: 700; color: var(--text); line-height: 1;
+}
+.ac-sub { display: none; } /* hidden — number speaks for itself */
+.ac-override {
+  font-size: 10px; background: none; border: none; border-bottom: 1px solid transparent;
+  color: var(--muted); width: 72px; text-align: center; padding: 1px 0; outline: none;
+  transition: border-color var(--transition); display: none;
+}
+.ac-override::placeholder { color: var(--border2); font-style: italic; }
+body.editing .ac-override { display: block; border-bottom-color: var(--border2); }
+body.editing .ac-override:focus { border-bottom-color: var(--accent); }
+
+/* IMAGE UPLOAD */
+.img-card { cursor: pointer; padding: 0; overflow: hidden; position: relative; flex: 1; min-height: 80px; }
+.img-card:hover .img-overlay { opacity: 1; }
+.img-upload-input { display: none; }
+.img-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; padding: 16px 8px; color: var(--muted); text-align: center;
+  font-size: 10px; letter-spacing: 0.05em; text-transform: uppercase;
+  border: 1px dashed var(--border2); border-radius: var(--radius-lg);
+  height: 100%; box-sizing: border-box; transition: border-color var(--transition);
+}
+.img-placeholder:hover { border-color: var(--accent); color: var(--accent); }
+.img-placeholder-icon { font-size: 20px; opacity: 0.5; }
+.img-preview {
+  display: none; border-radius: var(--radius-lg);
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: contain; object-position: center;
+}
+.img-preview.loaded { display: block; }
+.img-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.55);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity var(--transition); border-radius: var(--radius-lg);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--text); cursor: pointer;
+}
+
+/* ══════════════════════════════════════════
+   STATS + SKILLS
+   ══════════════════════════════════════════ */
+.stats-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+.stat-col {
+  background: var(--panel2); border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); display: flex; flex-direction: column;
+}
+.stat-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px 8px; border-bottom: 1px solid var(--border);
+}
+.stat-name {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted);
+}
+.stat-val {
+  font-size: 26px; font-weight: 700; background: none; border: none;
+  border-bottom: 1px solid transparent; color: var(--text);
+  width: 44px; text-align: right; padding: 0; outline: none;
+  transition: border-color var(--transition); line-height: 1;
+}
+.stat-val::placeholder { color: var(--muted); }
+body.editing .stat-val { border-bottom-color: var(--border2); }
+body.editing .stat-val:focus { border-bottom-color: var(--accent); }
+.stat-roll-line {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 14px; border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+}
+.stat-roll-text { font-size: 12px; font-weight: 700; color: var(--accent); }
+.skills-list { padding: 4px 0 6px; display: flex; flex-direction: column; }
+.skill-row {
+  display: flex; align-items: center; padding: 4px 10px 4px 14px; gap: 8px;
+  transition: background var(--transition); cursor: pointer; border-radius: 3px;
+}
+.skill-row:hover { background: rgba(200,168,75,0.07); }
+.skill-row:hover .skill-badge { border-color: var(--accent); color: var(--accent); }
+.skill-name {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--dim); flex: 1; white-space: nowrap;
+}
+.skill-mods { display: flex; align-items: center; gap: 4px; }
+.skill-base-mod { display: none; }
+.skill-sep { display: none; }
+body.editing .skill-sep { display: inline; color: var(--border2); font-size: 9px; }
+.prof-val {
+  font-size: 11px; font-weight: 700; background: none; border: none;
+  border-bottom: 1px dashed var(--border2); color: var(--dim); width: 20px;
+  text-align: center; padding: 0; outline: none; transition: border-color var(--transition);
+  cursor: text;
+}
+.prof-val:focus { border-bottom-color: var(--accent); }
+.prof-label { display: none; }
+body.editing .prof-label { display: inline; font-size: 9px; color: var(--muted); }
+/* Signed total badge on the right — always visible */
+.skill-badge {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  background: var(--border); border: 1px solid var(--border2);
+  border-radius: var(--radius); padding: 1px 7px; min-width: 38px;
+  text-align: center; flex-shrink: 0; transition: all var(--transition); line-height: 1.6;
+}
+.roll-result { display: none; }
+.roll-btn { display: none; }
+.hide { display: none !important; }
+
+/* ══════════════════════════════════════════
+   ABILITY WIDGET
+   ══════════════════════════════════════════ */
+.ability-widget-shell { min-height: 80px; }
+.ability-widget-placeholder {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 8px; padding: 28px 16px; border: 1px dashed var(--border2);
+  border-radius: var(--radius); text-align: center; color: var(--muted);
+}
+.awp-icon { font-size: 22px; opacity: 0.4; }
+.awp-text { font-size: 12px; line-height: 1.6; }
+
+/* ══════════════════════════════════════════
+   INVENTORY
+   ══════════════════════════════════════════ */
+.inv-header { display: grid; grid-template-columns: 1fr 56px 22px; gap: 6px; margin-bottom: 4px; }
+.inv-row    { display: grid; grid-template-columns: 1fr 56px 22px; gap: 6px; margin-bottom: 5px; align-items: center; }
+.inv-row input {
+  background: var(--input); border: 1px solid var(--border2); color: var(--text);
+  padding: 4px 7px; font-size: 12px; border-radius: var(--radius); width: 100%; outline: none;
+}
+.inv-row input:focus { border-color: var(--accent); }
+.col-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-weight: 700; }
+.rm-btn {
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  cursor: pointer; border-radius: var(--radius); font-size: 11px;
+  width: 22px; height: 26px; display: flex; align-items: center; justify-content: center;
+  transition: all var(--transition);
+}
+.rm-btn:hover { border-color: var(--red); color: var(--red); }
+.add-btn {
+  width: 100%; margin-top: 5px; padding: 6px; font-size: 11px; font-weight: 600;
+  cursor: pointer; border: 1px dashed var(--border2); background: transparent;
+  color: var(--muted); border-radius: var(--radius); letter-spacing: 0.05em;
+  transition: all var(--transition);
+}
+.add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ══════════════════════════════════════════
+   TEXTAREA
+   ══════════════════════════════════════════ */
+.plain-textarea {
+  width: 100%; background: var(--input); border: 1px solid var(--border2);
+  color: var(--text); padding: 8px 10px; font-size: 13px; line-height: 1.6;
+  border-radius: var(--radius); resize: vertical; min-height: 80px; outline: none;
+}
+.plain-textarea:focus   { border-color: var(--accent); }
+.plain-textarea::placeholder { color: var(--muted); }
+
+/* ══════════════════════════════════════════
+   LORE
+   ══════════════════════════════════════════ */
+.lore-card { padding-bottom: 0; }
+.lore-toggle {
+  cursor: pointer; user-select: none; margin-bottom: 0 !important; padding-bottom: 6px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.lore-toggle::after { display: none; }
+.lore-chevron { font-size: 9px; color: var(--muted); transition: transform var(--transition); margin-left: auto; }
+.lore-chevron.open { transform: rotate(180deg); }
+.lore-body { overflow: hidden; max-height: 0; padding: 0; transition: max-height 0.3s ease, padding 0.3s ease; }
+.lore-body.open { max-height: 600px; padding: 10px 0 16px; }
+
+/* ══════════════════════════════════════════
+   NOTES
+   ══════════════════════════════════════════ */
+.notes-trigger {
+  position: fixed; bottom: 24px; right: 24px; z-index: 200;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--bg); background: var(--accent); border: none;
+  border-radius: 99px; padding: 8px 20px; cursor: pointer;
+  box-shadow: var(--shadow-sm); transition: opacity var(--transition);
+}
+.notes-trigger:hover { opacity: 0.85; }
+.notes-page { position: fixed; inset: 0; z-index: 300; background: var(--bg); display: none; }
+.notes-page.open { display: flex; }
+.notes-sidebar { width: 200px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border2); display: flex; flex-direction: column; }
+.notes-sidebar-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 12px 8px; border-bottom: 1px solid var(--border2); flex-shrink: 0; }
+.notes-sidebar-title { font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; }
+.notes-add-doc { background: none; border: 1px solid var(--border2); color: var(--muted); cursor: pointer; border-radius: var(--radius); font-size: 15px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+.notes-add-doc:hover { border-color: var(--accent); color: var(--accent); }
+.notes-doc-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+.notes-doc-item { display: flex; align-items: center; gap: 4px; padding: 7px 10px; cursor: pointer; border-left: 2px solid transparent; transition: background var(--transition), border-color var(--transition); user-select: none; }
+.notes-doc-item:hover { background: var(--panel2); }
+.notes-doc-item.active { background: var(--panel2); border-left-color: var(--accent); }
+.notes-doc-item.dragging { opacity: 0.3; }
+.notes-doc-item.drag-over { border-top: 2px solid var(--accent); }
+.notes-doc-name { flex: 1; font-size: 12px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.notes-doc-del { background: none; border: none; color: transparent; cursor: pointer; font-size: 11px; padding: 1px 3px; border-radius: 2px; flex-shrink: 0; transition: color var(--transition); }
+.notes-doc-item:hover .notes-doc-del { color: var(--muted); }
+.notes-doc-del:hover { color: var(--red) !important; }
+.notes-doc-rename-input { font-size: 12px; background: var(--input); border: 1px solid var(--accent); color: var(--text); padding: 1px 4px; border-radius: var(--radius); width: 100%; outline: none; }
+.notes-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.notes-topbar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--accent); flex-shrink: 0; }
+.notes-doc-title-wrap { flex: 1; min-width: 0; }
+.notes-title-input { font-size: 16px; font-weight: 700; background: none; border: none; color: var(--text); outline: none; width: 100%; padding: 0; }
+.notes-title-input::placeholder { color: var(--muted); }
+.notes-back { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); background: none; border: 1px solid var(--border2); padding: 4px 12px; border-radius: 99px; cursor: pointer; transition: all var(--transition); flex-shrink: 0; }
+.notes-back:hover { color: var(--accent); border-color: var(--accent); }
+.notes-editor { flex: 1; background: var(--input); border: none; color: var(--text); padding: 20px 24px; font-size: 14px; line-height: 1.8; resize: none; outline: none; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .stats-grid            { grid-template-columns: 1fr; }
+  .header-grid           { grid-template-columns: 1fr; }
+  .hp-widget             { align-items: flex-start; }
+  .rolls-initiative-wrap { flex-direction: column; }
+  .side-column           { width: 100%; flex-direction: row; }
+}
+/* ══════════════════════════════════════════
+   ABILITY / ACTIONS TABS
+   ══════════════════════════════════════════ */
+.ab-tab-bar {
+  display: flex; gap: 0; margin-bottom: 14px;
+  border-bottom: 1px solid var(--border2);
+}
+.ab-tab {
+  font-family: var(--font-display); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 6px 16px; cursor: pointer; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  background: none; border-top: none; border-left: none; border-right: none;
+  transition: all var(--transition);
+}
+.ab-tab:hover { color: var(--text); }
+.ab-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.ab-pane { display: none; }
+.ab-pane.active { display: block; }
+
+/* ══════════════════════════════════════════
+   ACTIONS
+   ══════════════════════════════════════════ */
+.actions-section-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted);
+  margin-bottom: 6px;
+}
+.actions-divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+.action-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 7px 10px; border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 4px;
+  background: var(--panel2);
+}
+.action-row:last-child { margin-bottom: 0; }
+
+/* Default rows — dimmer, clearly locked */
+.action-row.default-row { opacity: 0.85; }
+
+.action-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; user-select: none; }
+.action-header { display: flex; align-items: center; gap: 6px; }
+.action-name-text {
+  font-size: 13px; font-weight: 600; color: var(--text); flex: 1;
   pointer-events: none;
-  overflow: hidden;
 }
-.aurora-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  animation: drift 12s ease-in-out infinite alternate;
-  opacity: 0;
-  animation-fill-mode: forwards;
-}
-.aurora-blob:nth-child(1) {
-  width: 600px; height: 400px;
-  top: -10%; left: -10%;
-  background: radial-gradient(ellipse, rgba(91,33,182,.22) 0%, transparent 70%);
-  animation-duration: 14s;
-  animation-delay: 0s;
-}
-.aurora-blob:nth-child(2) {
-  width: 500px; height: 350px;
-  top: 20%; right: -8%;
-  background: radial-gradient(ellipse, rgba(124,58,237,.18) 0%, transparent 70%);
-  animation-duration: 11s;
-  animation-delay: -4s;
-}
-.aurora-blob:nth-child(3) {
-  width: 700px; height: 300px;
-  bottom: 10%; left: 20%;
-  background: radial-gradient(ellipse, rgba(59,7,100,.3) 0%, transparent 65%);
-  animation-duration: 16s;
-  animation-delay: -8s;
-}
-.aurora-blob:nth-child(4) {
-  width: 400px; height: 500px;
-  top: 40%; left: 30%;
-  background: radial-gradient(ellipse, rgba(167,139,250,.08) 0%, transparent 65%);
-  animation-duration: 18s;
-  animation-delay: -2s;
-}
+.action-flavor { font-size: 10px; font-style: italic; color: var(--muted); line-height: 1.4; pointer-events: none; }
+.action-notes-text { font-size: 11px; color: var(--dim); line-height: 1.5; pointer-events: none; }
 
-@keyframes drift {
-  0%   { transform: translate(0, 0) scale(1);     opacity: .7; }
-  33%  { transform: translate(40px, -30px) scale(1.05); opacity: 1; }
-  66%  { transform: translate(-20px, 50px) scale(.95); opacity: .8; }
-  100% { transform: translate(60px, 20px) scale(1.08); opacity: .9; }
+/* Custom rows — editable */
+.action-name {
+  background: none; border: none; color: var(--text);
+  font-family: var(--font-main); font-size: 13px; font-weight: 600;
+  padding: 0; outline: none; flex: 1;
 }
-
-/* ═══════════════════════════════
-   CONTENT
-   ═══════════════════════════════ */
-.content-wrap {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 680px;
-  padding: clamp(2rem, 5vw, 3.5rem) clamp(1rem, 4vw, 1.75rem);
-  display: flex;
-  flex-direction: column;
-  gap: .7rem;
+.action-name::placeholder { color: var(--muted); font-weight: 400; }
+.action-notes {
+  background: none; border: none; color: var(--dim);
+  font-family: var(--font-main); font-size: 11px;
+  padding: 0; outline: none; width: 100%; resize: none;
+  overflow: hidden; line-height: 1.5; height: 16px;
 }
+.action-notes:focus { height: auto; min-height: 32px; }
+.action-notes::placeholder { color: var(--muted); }
 
-/* ── Ghost glass card ── */
+.action-rolls { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; align-items: flex-end; }
+.action-roll-wrap { display: flex; align-items: center; gap: 4px; }
+.action-roll-label {
+  font-size: 8px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted); min-width: 20px;
+}
+.action-roll-text {
+  font-size: 11px; color: var(--accent); min-width: 52px;
+  text-align: center; pointer-events: none; user-select: none;
+}
+.action-roll-input {
+  background: var(--input); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--font-main); font-size: 11px;
+  width: 62px; text-align: center; padding: 2px 5px;
+  border-radius: var(--radius); outline: none; transition: border-color var(--transition);
+}
+.action-roll-input:focus { border-color: var(--accent); }
+.action-roll-input::placeholder { color: var(--muted); }
+.action-roll-btn {
+  font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 8px; border: 1px solid var(--border); background: none;
+  color: var(--muted); border-radius: 99px; cursor: pointer;
+  transition: all var(--transition); white-space: nowrap;
+}
+.action-roll-btn:hover { border-color: var(--accent); color: var(--accent); }
+.action-roll-btn:active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.action-rm {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 11px; padding: 0;
+  line-height: 1; transition: color var(--transition); flex-shrink: 0;
+}
+.action-rm:hover { color: var(--red); }
+.action-name-text { font-family: var(--font-main); }
+.action-notes-text { font-family: var(--font-main); }
+
+/* DEATH SAVES */
+#deathSaves {
+  display: none; flex-direction: column; gap: 8px;
+  padding: 10px 14px; margin-top: 6px;
+  border: 1px solid var(--red); border-radius: var(--radius-lg);
+  background: rgba(168,50,50,0.08);
+}
+#deathSaves.on { display: flex; }
+.ds-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--red); }
+.ds-row { display: flex; align-items: center; gap: 8px; }
+.ds-label { font-size: 10px; color: var(--muted); width: 64px; text-transform: uppercase; letter-spacing: 0.08em; }
+.ds-pips { display: flex; gap: 5px; }
+.ds-pip { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--border2); cursor: pointer; transition: all 0.1s; }
+.ds-pip:hover { border-color: var(--accent); }
+.ds-pip.s.on { background: var(--green); border-color: var(--green); }
+.ds-pip.f.on { background: var(--red);   border-color: var(--red); }
+.ds-roll { margin-left: auto; font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 10px; border: 1px solid var(--red); background: none; color: var(--red); border-radius: 99px; cursor: pointer; transition: all 0.1s; }
+.ds-roll:hover { background: var(--red); color: #fff; }
+
+/* ══════════════════════════════════════════
+   SLOAN — PURPLE MIST THEME
+   ══════════════════════════════════════════ */
+body { background: #0a0810; min-height: 100vh; }
+
+#mistCanvas { position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0; }
+.page { position:relative;z-index:1; }
+
 .card {
-  background: var(--bg-card);
-  backdrop-filter: blur(20px) saturate(1.6) brightness(.9);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6) brightness(.9);
-  border: 1px solid var(--border2);
-  border-radius: 2px;
-  padding: clamp(.95rem, 3vw, 1.35rem) clamp(1.1rem, 4vw, 1.6rem);
-  position: relative;
-  overflow: hidden;
-  box-shadow:
-    0 0 0 1px rgba(124,58,237,.04),
-    inset 0 1px 0 rgba(167,139,250,.08),
-    0 8px 40px rgba(0,0,0,.4);
+  background: rgba(16,13,26,0.95);
+  border: 1px solid rgba(155,109,218,0.18);
+  border-radius: 8px;
+  box-shadow: 0 2px 24px rgba(0,0,0,0.7), 0 0 0 1px rgba(155,109,218,0.04);
+  transition: border-color 0.4s, box-shadow 0.4s;
+}
+.card:hover {
+  border-color: rgba(155,109,218,0.35);
+  box-shadow: 0 2px 24px rgba(0,0,0,0.7), 0 0 20px rgba(155,109,218,0.06);
 }
 
-/* shimmer edge */
-.card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 60%; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--lilac), transparent);
-  opacity: .5;
-  animation: shimmer 6s ease-in-out infinite;
-}
-@keyframes shimmer {
-  0%   { left: -60%; opacity: 0; }
-  20%  { opacity: .5; }
-  100% { left: 120%; opacity: 0; }
-}
-
-/* inner noise/grain texture */
-.card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  background-size: 180px;
-  pointer-events: none;
-  mix-blend-mode: overlay;
-  opacity: .6;
-}
-
-.sec-label {
-  font-family: var(--font-mono);
-  font-size: clamp(.52rem, 1.4vw, .58rem);
-  letter-spacing: .22em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  margin-bottom: clamp(.6rem, 2vw, .9rem);
-}
-
-/* ── Header ── */
-.header-card {
-  background: linear-gradient(135deg, rgba(14,8,28,.85) 0%, rgba(20,10,38,.8) 50%, rgba(10,7,24,.88) 100%);
-  backdrop-filter: blur(24px) saturate(1.8);
-  -webkit-backdrop-filter: blur(24px) saturate(1.8);
-  border: 1px solid var(--border-hot);
-  border-radius: 2px;
-  padding: clamp(1.2rem, 4vw, 1.9rem) clamp(1.1rem, 4vw, 1.7rem);
-  position: relative;
-  overflow: hidden;
-  box-shadow:
-    0 0 60px rgba(91,33,182,.12),
-    inset 0 1px 0 rgba(167,139,250,.15),
-    0 16px 60px rgba(0,0,0,.5);
-}
-/* purple top glow line */
-.header-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg,
-    transparent 0%,
-    var(--purple2) 15%,
-    var(--lilac) 40%,
-    var(--lavender) 55%,
-    var(--lilac) 70%,
-    var(--purple2) 85%,
-    transparent 100%);
-  box-shadow: 0 0 20px rgba(167,139,250,.5);
-}
-/* ghost orb decoration */
-.header-card::after {
-  content: '';
-  position: absolute;
-  right: -40px; top: -40px;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(124,58,237,.12) 0%, transparent 65%);
-  border-radius: 50%;
-  pointer-events: none;
-  animation: pulse-orb 5s ease-in-out infinite alternate;
-}
-@keyframes pulse-orb {
-  from { transform: scale(1); opacity: .7; }
-  to   { transform: scale(1.15); opacity: 1; }
-}
-
-.badge-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-
-.char-tag {
-  font-family: var(--font-mono);
-  font-size: clamp(.52rem, 1.4vw, .58rem);
-  letter-spacing: .14em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  margin-bottom: .5rem;
-}
-.char-name {
+.card-title {
   font-family: var(--font-display);
-  font-size: clamp(2rem, 6.5vw, 3rem);
-  font-weight: 800;
-  color: var(--ghost);
-  letter-spacing: .02em;
-  line-height: .95;
-  text-shadow:
-    0 0 30px rgba(167,139,250,.5),
-    0 0 60px rgba(124,58,237,.25),
-    0 2px 0 rgba(0,0,0,.6);
+  font-size: 11px; font-weight: 600; letter-spacing: 0.28em;
+  color: var(--accent);
+  border-bottom-color: rgba(155,109,218,0.14);
+  text-shadow: 0 0 12px rgba(155,109,218,0.4);
 }
-.char-meta {
-  font-family: var(--font-body);
-  font-size: clamp(.68rem, 1.9vw, .78rem);
-  color: var(--text-mid);
-  margin-top: .28rem;
-  font-style: italic;
-}
-.char-meta.tag {
-  font-style: normal;
-  font-family: var(--font-mono);
-  font-size: clamp(.52rem, 1.4vw, .58rem);
-  letter-spacing: .1em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  margin-top: .1rem;
-}
-.badge { text-align: right; flex-shrink: 0; }
-.badge-label {
-  font-family: var(--font-mono);
-  font-size: clamp(.48rem, 1.3vw, .54rem);
-  color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: .14em;
-}
-.badge-value {
+.card-title::after { background: rgba(155,109,218,0.05); }
+
+.char-name-input {
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 6vw, 3rem);
-  font-weight: 800;
-  color: var(--lilac);
-  line-height: .9;
-  margin-top: .1rem;
-  text-shadow:
-    0 0 16px rgba(167,139,250,.7),
-    0 0 40px rgba(124,58,237,.3);
+  font-size: 30px; font-weight: 700; letter-spacing: 0.06em;
+  color: var(--text);
+  text-shadow: 0 0 20px rgba(155,109,218,0.25);
 }
+.field-label { color: var(--muted); letter-spacing: 0.14em; font-size: 8px; }
+.plain-field { color: var(--text); }
+.power-field, .power-select { color: var(--dim); font-size: 12px; }
 
-/* ── Rolls ── */
-.rolls-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: clamp(.4rem,1.8vw,.58rem); }
-.roll-card {
-  background: var(--bg-tint);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: .72rem .9rem;
-  display: flex; flex-direction: column; gap: .2rem;
-  position: relative; overflow: hidden;
+.stat-col {
+  background: rgba(10,8,18,0.98);
+  border: 1px solid rgba(155,109,218,0.12);
+  border-radius: 6px;
 }
-.roll-card::before {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 1px;
-}
-.roll-card:nth-child(1)::before { background: var(--purple);  box-shadow: 0 0 6px rgba(124,58,237,.5); }
-.roll-card:nth-child(2)::before { background: var(--lilac);   box-shadow: 0 0 6px rgba(167,139,250,.5); }
-.roll-card:nth-child(3)::before { background: var(--lavender);box-shadow: 0 0 5px rgba(196,181,253,.4); }
+.stat-header { background: rgba(155,109,218,0.05); border-bottom: 1px solid rgba(155,109,218,0.1); }
+.stat-name { font-family: var(--font-display); font-size: 10px; font-weight: 600; letter-spacing: 0.24em; color: var(--dim); }
+.stat-val { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--text); }
+.stat-roll-line { background: rgba(155,109,218,0.025); border-bottom: 1px solid rgba(155,109,218,0.07); }
+.stat-roll-line:hover { background: rgba(155,109,218,0.07); cursor: pointer; }
+.stat-roll-text { font-family: var(--font-display); font-size: 12px; color: var(--accent); letter-spacing: 0.04em; text-shadow: 0 0 8px rgba(155,109,218,0.4); }
 
-.roll-abbr {
-  font-family: var(--font-mono);
-  font-size: clamp(.52rem,1.4vw,.58rem);
-  color: var(--text-dim);
-  letter-spacing: .14em;
-  text-transform: uppercase;
+.skill-name { font-size: 9px; font-weight: 500; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; }
+.skill-badge {
+  font-family: var(--font-display); font-size: 13px; font-weight: 700;
+  background: rgba(155,109,218,0.08); border: 1px solid rgba(155,109,218,0.2);
+  color: var(--accent); min-width: 40px; border-radius: 4px;
+  text-shadow: 0 0 6px rgba(155,109,218,0.35);
 }
-.roll-mod {
-  font-family: var(--font-display);
-  font-size: clamp(.95rem,2.8vw,1.18rem);
-  font-weight: 700;
-  color: var(--ghost);
-  letter-spacing: .02em;
-  line-height: 1.1;
-  margin-top: .08rem;
-}
-.roll-note {
-  font-size: clamp(.58rem,1.6vw,.65rem);
-  color: var(--text-mid);
-  font-style: italic;
-  line-height: 1.4;
-  margin-top: .08rem;
-}
+.skill-row:hover { background: rgba(155,109,218,0.04); }
+.skill-row:hover .skill-badge { border-color: rgba(155,109,218,0.45); box-shadow: 0 0 10px rgba(155,109,218,0.15); }
 
-/* ── Abilities ── */
-.abilities-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: clamp(.5rem,2vw,.68rem); }
-.abilities-grid.single { grid-template-columns: 1fr; }
-.ability {
-  background: var(--bg-tint);
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  padding: .88rem 1rem;
-  display: flex; flex-direction: column; gap: .42rem;
-  position: relative; overflow: hidden;
-}
-.ability.full { grid-column: 1/-1; }
+.roll-btn { border-color: rgba(155,109,218,0.2); color: var(--muted); border-radius: 99px; }
+.roll-btn:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 8px rgba(155,109,218,0.2); }
 
-/* left ghost glow bar */
-.ability::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 1px; height: 100%;
-  background: linear-gradient(180deg, var(--lilac) 0%, var(--purple) 50%, transparent 100%);
-  opacity: .45;
-}
+.hp-num { font-family: var(--font-display); font-size: 20px; color: var(--text); }
+.hp-label { color: var(--muted); letter-spacing: 0.14em; font-size: 8px; }
+.hp-ctrl-btn.heal { border-color: var(--green); color: var(--green); }
+.hp-ctrl-btn.dmg  { border-color: var(--red); color: var(--red); }
+.level-label { color: var(--muted); letter-spacing: 0.14em; font-size: 8px; }
+.level-val { font-family: var(--font-display); font-size: 48px; font-weight: 700; color: var(--accent); text-shadow: 0 0 20px rgba(155,109,218,0.5); }
 
-.ability-header { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
-.ability-tag {
-  font-family: var(--font-mono);
-  font-size: clamp(.46rem,1.2vw,.52rem);
-  color: var(--lavender);
-  background: rgba(91,33,182,.25);
-  border: 1px solid rgba(124,58,237,.35);
-  padding: 2px 8px;
-  border-radius: 99px;
-  text-transform: uppercase;
-  letter-spacing: .1em;
-  flex-shrink: 0;
-}
-.ability-name {
-  font-family: var(--font-display);
-  font-size: clamp(.85rem,2.4vw,.98rem);
-  font-weight: 700;
-  color: var(--ghost);
-}
-.ability-desc {
-  font-size: clamp(.63rem,1.8vw,.71rem);
-  color: var(--text-mid);
-  line-height: 1.65;
-  font-style: italic;
-}
-.limits-label {
-  font-family: var(--font-mono);
-  font-size: clamp(.48rem,1.3vw,.54rem);
-  letter-spacing: .18em;
-  color: rgba(167,139,250,.45);
-  text-transform: uppercase;
-  margin-top: .28rem;
-}
-.limit-item { display: flex; gap: .4rem; align-items: flex-start; margin-top: .3rem; }
-.limit-dot {
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--purple);
-  margin-top: 5px;
-  flex-shrink: 0;
-  box-shadow: 0 0 5px rgba(124,58,237,.7);
-}
-.limit-text {
-  font-size: clamp(.6rem,1.7vw,.66rem);
-  color: var(--text-mid);
-  line-height: 1.5;
-  font-style: italic;
-}
-.limit-text b { color: var(--text); font-style: normal; }
+.initiative-card { border-color: rgba(155,109,218,0.22) !important; }
+.init-modifier { font-family: var(--font-display); font-size: 44px; font-weight: 700; color: var(--accent); text-shadow: 0 0 18px rgba(155,109,218,0.5); }
+.ac-derived { font-family: var(--font-display); font-size: 44px; font-weight: 700; color: var(--text); }
 
-/* ── Lore ── */
-.lore-block { display: flex; flex-direction: column; gap: .68rem; }
-.lore-text {
-  font-size: clamp(.66rem,1.9vw,.75rem);
-  color: var(--text-mid);
-  line-height: 1.82;
-}
-.lore-text + .lore-text {
-  padding-top: .68rem;
-  border-top: 1px solid rgba(124,58,237,.08);
-}
-.lore-text em  { color: var(--lilac); font-style: italic; }
-.lore-text strong { color: var(--ghost); font-style: normal; }
+.edit-btn { border-color: rgba(155,109,218,0.2); color: var(--muted); border-radius: 4px; }
+.edit-btn:hover, .edit-btn.active { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px rgba(155,109,218,0.2); }
 
-/* ── Footer ── */
-.footer {
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: clamp(.48rem,1.3vw,.54rem);
-  color: var(--text-dim);
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  padding: .4rem 0 .2rem;
-}
-.footer span {
-  display: inline-block;
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--purple);
-  vertical-align: middle;
-  margin: 0 .5rem .06rem;
-  box-shadow: 0 0 6px rgba(124,58,237,.7);
-}
+.ab-tab { font-family: var(--font-display); font-size: 11px; letter-spacing: 0.18em; color: var(--muted); }
+.ab-tab.active { color: var(--accent); border-bottom-color: var(--accent); text-shadow: 0 0 8px rgba(155,109,218,0.4); }
+.ab-tab-bar { border-bottom-color: rgba(155,109,218,0.14); }
 
-@media(max-width:480px) {
-  .rolls-grid { grid-template-columns: 1fr 1fr; }
-  .abilities-grid { grid-template-columns: 1fr; }
-  .ability.full { grid-column: 1; }
+.action-row { border-color: rgba(155,109,218,0.1); background: rgba(10,8,18,0.95); border-radius: 6px; }
+.action-row:hover { border-color: rgba(155,109,218,0.25); }
+.action-name-text { font-family: var(--font-display); font-size: 13px; font-weight: 600; letter-spacing: 0.04em; color: var(--text); }
+.action-flavor { color: var(--muted); }
+.action-notes-text { color: var(--dim); font-size: 11px; }
+.action-roll-text { color: var(--accent); font-family: var(--font-display); text-shadow: 0 0 6px rgba(155,109,218,0.3); }
+.action-roll-btn:hover { border-color: var(--accent); color: var(--accent); }
+.actions-section-label { font-family: var(--font-display); letter-spacing: 0.2em; color: var(--muted); font-size: 9px; }
+.actions-divider { background: rgba(155,109,218,0.1); }
+
+.plain-textarea { background: rgba(8,6,15,0.98); border-color: rgba(155,109,218,0.12); border-radius: 4px; }
+.plain-textarea:focus { border-color: rgba(155,109,218,0.38); }
+.inv-row input { background: rgba(8,6,15,0.98); border-color: rgba(155,109,218,0.12); color: var(--text); border-radius: 4px; }
+.inv-row input:focus { border-color: rgba(155,109,218,0.38); }
+.add-btn { border-color: rgba(155,109,218,0.12); color: var(--muted); border-radius: 4px; }
+.add-btn:hover { border-color: rgba(155,109,218,0.4); color: var(--accent); }
+.col-label { font-family: var(--font-display); letter-spacing: 0.14em; color: var(--muted); font-size: 9px; }
+
+.notes-trigger { background: var(--accent); color: #fff; font-family: var(--font-display); font-weight: 700; letter-spacing: 0.12em; border-radius: 99px; box-shadow: 0 0 18px rgba(155,109,218,0.4); font-size: 11px; }
+.notes-trigger:hover { box-shadow: 0 0 28px rgba(155,109,218,0.6); }
+
+#diceBtn { background: rgba(16,13,26,0.97); border-color: rgba(155,109,218,0.22); color: var(--dim); border-radius: 50%; }
+#diceBtn:hover { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 12px rgba(155,109,218,0.25); }
+#diceBtn.active { background: rgba(155,109,218,0.12); border-color: var(--accent); color: var(--accent); }
+#dicePanel { background: rgba(16,13,26,0.99); border-color: rgba(155,109,218,0.2); border-radius: 8px; }
+.dice-die { background: var(--panel2); border-color: var(--border2); color: var(--dim); border-radius: 4px; }
+.dice-die:hover, .dice-die.selected { border-color: var(--accent); color: var(--accent); }
+.dice-die.selected { background: rgba(155,109,218,0.1); }
+.dice-roll-btn { background: var(--accent); color: #fff; font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; border-radius: 4px; }
+
+.toast-item { background: rgba(16,13,26,0.98); border-color: rgba(155,109,218,0.22); border-radius: 6px; box-shadow: 0 0 18px rgba(155,109,218,0.1), 0 4px 20px rgba(0,0,0,0.7); }
+.toast-total { color: var(--accent); font-family: var(--font-display); text-shadow: 0 0 8px rgba(155,109,218,0.4); }
+
+#deathSaves { border-color: var(--red); background: rgba(100,20,40,0.1); border-radius: 6px; }
+.ds-title { color: var(--red); font-family: var(--font-display); letter-spacing: 0.2em; font-size: 9px; }
+.ds-roll { border-color: var(--red); color: var(--red); border-radius: 99px; font-family: var(--font-display); font-size: 9px; letter-spacing: 0.1em; }
+.ds-roll:hover { background: var(--red); color: #fff; }
+
+.img-placeholder { border-color: rgba(155,109,218,0.14); border-radius: 6px; }
+.img-placeholder:hover { border-color: rgba(155,109,218,0.35); color: var(--accent); }
+
+.page > div:first-child { color: rgba(155,109,218,0.22) !important; }
+
+/* Lore */
+.sloan-lore { display:flex;flex-direction:column;gap:12px;padding:4px 2px 10px; }
+.sloan-lore p { font-size:13px;line-height:1.9;color:var(--dim); }
+.sloan-lore strong { color:var(--text);font-weight:600; }
+.sloan-lore em { color:var(--accent);font-style:normal;text-shadow:0 0 6px rgba(155,109,218,0.2); }
+.sloan-info { display:flex;flex-direction:column;gap:4px;padding:10px 0;border-top:1px solid rgba(155,109,218,0.1);margin-top:8px; }
+.sloan-info-row { display:flex;gap:8px;font-size:11px; }
+.sloan-info-key { color:var(--muted);width:72px;flex-shrink:0;font-style:italic; }
+.sloan-info-val { color:var(--dim); }
+
+
+/* HOLLOW WIDGET */
+.hollow-widget { display:flex;flex-direction:column;gap:12px; }
+.hw-title { font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:0.12em;color:var(--accent);text-shadow:0 0 10px rgba(155,109,218,0.4); }
+.hw-desc { font-size:12px;color:var(--dim);line-height:1.75; }
+.hw-divider { height:1px;background:rgba(155,109,218,0.1); }
+.hw-section-label { font-size:9px;font-weight:600;letter-spacing:0.2em;text-transform:uppercase;color:rgba(155,109,218,0.4); }
+.hw-checks { display:flex;flex-direction:column;gap:6px; }
+.hw-check-row { display:flex;align-items:center;gap:8px;padding:7px 10px;background:rgba(155,109,218,0.04);border:1px solid rgba(155,109,218,0.1);border-radius:4px; }
+.hw-check-state { font-size:12px;color:var(--dim);flex:1; }
+.hw-check-result { font-size:12px;color:var(--text);white-space:nowrap; }
+.hw-free { color:rgba(74,138,122,0.8);font-style:italic; }
+.hw-threshold { color:var(--accent);font-weight:700;font-family:var(--font-display);text-shadow:0 0 6px rgba(155,109,218,0.4); }
+.hw-roll-btn {
+  padding:3px 12px;border:1px solid rgba(155,109,218,0.3);background:none;color:var(--accent);
+  border-radius:99px;cursor:pointer;font-size:10px;font-weight:600;letter-spacing:0.08em;
+  transition:all 0.15s;white-space:nowrap;
 }
+.hw-roll-btn:hover { background:rgba(155,109,218,0.12);border-color:var(--accent);box-shadow:0 0 8px rgba(155,109,218,0.2); }
+.hw-roll-result { font-size:12px;font-weight:600;padding:6px 10px;border-radius:4px;display:none;text-align:center; }
+.hw-roll-result.pass { background:rgba(74,138,122,0.1);color:rgba(100,200,160,0.9);display:block; }
+.hw-roll-result.fail { background:rgba(155,109,218,0.08);color:var(--accent);display:block; }
+.hw-rules { padding-left:16px;margin:0;display:flex;flex-direction:column;gap:7px; }
+.hw-rules li { font-size:12px;color:var(--dim);line-height:1.65; }
+.hw-em { color:var(--accent);font-weight:600;text-shadow:0 0 5px rgba(155,109,218,0.25); }
+
 </style>
 </head>
 <body>
 
-<!-- Aurora blobs -->
-<div class="aurora">
-  <div class="aurora-blob"></div>
-  <div class="aurora-blob"></div>
-  <div class="aurora-blob"></div>
-  <div class="aurora-blob"></div>
+<canvas id="mistCanvas"></canvas>
+
+<div class="page">
+
+  <!-- WARNING -->
+  <div style="text-align:center;font-size:10px;color:var(--muted);letter-spacing:0.04em;padding:2px 0 4px;">
+    Please try to roll with a real dice, these online rolls are untrustworthy and are a last resort!
+  </div>
+
+  <!-- EDIT BAR -->
+  <div class="edit-bar">
+    <button class="edit-btn" id="editBtn" onclick="toggleEdit()">Edit</button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="card">
+    <div class="header-grid">
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <input class="char-name-input locked-field" id="charName" type="text" placeholder="Character Name">
+        <div class="meta-row">
+          <div class="meta-field">
+            <span class="field-label">Player</span>
+            <input class="plain-field locked-field" id="playerName" type="text" placeholder="Player Name">
+          </div>
+        </div>
+        <div class="power-line">
+          <select class="power-select locked-field" id="powerCat">
+            <option value="" disabled selected>Category</option>
+            <option>Embodiment</option>
+            <option>Conjuration</option>
+          </select>
+          <span class="power-sep">·</span>
+          <select class="power-select locked-field" id="powerType">
+            <option value="" disabled selected>Type</option>
+            <option>EVO</option>
+            <option>EGG</option>
+            <option>FIX</option>
+          </select>
+          <span class="power-sep">—</span>
+          <input class="power-field pf-name locked-field" id="abilityName" type="text" placeholder="Ability Name">
+        </div>
+      </div>
+
+      <div class="hp-widget">
+        <div class="hp-row-top">
+          <span class="hp-label">HP</span>
+          <div class="hp-display">
+            <button class="hp-ctrl-btn dmg"  onclick="adjustHp(-1)">−</button>
+            <input  class="hp-amt" type="number" id="hpAmount" value="1" min="1">
+            <button class="hp-ctrl-btn heal" onclick="adjustHp(1)">+</button>
+            <input class="hp-num locked-field" type="number" id="currentHp" placeholder="—" oninput="clampHp(); save()">
+            <span class="hp-slash">/</span>
+            <input class="hp-num locked-field" type="number" id="maxHp" placeholder="—" oninput="save()">
+            <span class="hp-flash" id="hpFlash"></span>
+          </div>
+        </div>
+        <div class="level-row">
+          <span class="level-label">LVL</span>
+          <input class="level-val locked-field" type="number" id="levelVal" placeholder="1" min="1">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- DEATH SAVES -->
+  <div id="deathSaves">
+    <div class="ds-title">⚠ Death Saves</div>
+    <div class="ds-row">
+      <span class="ds-label">Successes</span>
+      <div class="ds-pips">
+        <div class="ds-pip s" id="ds-s-0" onclick="dsPip(this)"></div>
+        <div class="ds-pip s" id="ds-s-1" onclick="dsPip(this)"></div>
+        <div class="ds-pip s" id="ds-s-2" onclick="dsPip(this)"></div>
+      </div>
+    </div>
+    <div class="ds-row">
+      <span class="ds-label">Failures</span>
+      <div class="ds-pips">
+        <div class="ds-pip f" id="ds-f-0" onclick="dsPip(this)"></div>
+        <div class="ds-pip f" id="ds-f-1" onclick="dsPip(this)"></div>
+        <div class="ds-pip f" id="ds-f-2" onclick="dsPip(this)"></div>
+      </div>
+      <button class="ds-roll" onclick="dsRoll()">Roll Save</button>
+      <button class="ds-roll" onclick="dsClear()" style="border-color:var(--muted);color:var(--muted);margin-left:6px;">Reset</button>
+    </div>
+  </div>
+
+  <!-- STATS + SKILLS + SIDE COLUMN -->
+  <div class="rolls-initiative-wrap">
+
+    <!-- SIDE COLUMN -->
+    <div class="side-column">
+
+      <div class="card initiative-card" onclick="doInitRoll()" style="cursor:pointer;">
+        <div class="card-title" style="pointer-events:none;">Initiative</div>
+        <div class="initiative-body" style="pointer-events:none;">
+          <div class="init-modifier" id="init-formula">+0</div>
+          <div class="init-result" id="init-result"></div>
+          <div class="init-bonus-row">
+            <button class="init-adj-btn hidden-ctrl" id="initMinus" onclick="event.stopPropagation();adjustInitBonus(-1)" style="pointer-events:auto;">−</button>
+            <span class="init-bonus-val" id="initBonusDisplay"></span>
+            <button class="init-adj-btn hidden-ctrl" id="initPlus" onclick="event.stopPropagation();adjustInitBonus(1)" style="pointer-events:auto;">+</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card ac-card">
+        <div class="card-title">AC</div>
+        <div class="ac-body">
+          <div class="ac-derived" id="acDerived">10</div>
+          <input class="ac-override locked-field" type="number" id="acVal" placeholder="Override" oninput="updateACDisplay(); save()">
+        </div>
+      </div>
+
+      <!-- IMAGE CARD -->
+      <div class="card img-card" onclick="document.getElementById('imgInput').click()">
+        <input type="file" id="imgInput" class="img-upload-input" accept="image/*" onchange="loadImage(event)">
+        <div class="img-placeholder" id="imgPlaceholder">
+          <span class="img-placeholder-icon">🖼</span>
+          <span>Upload image</span>
+        </div>
+        <img class="img-preview" id="imgPreview" alt="Character image">
+        <div class="img-overlay" id="imgOverlay">Change image</div>
+      </div>
+
+    </div>
+
+    <!-- CORE ROLLS -->
+    <div class="card" style="flex:1;min-width:0;">
+      <div class="card-title">Core Rolls</div>
+      <div class="stats-grid">
+
+        <!-- STR — default 10 -->
+        <div class="stat-col">
+          <div class="stat-header">
+            <span class="stat-name">STR</span>
+            <div class="stat-val-wrap">
+              <input class="stat-val locked-field" type="number" id="strVal" value="10" min="1" max="30" oninput="updateStat('str'); save()">
+            </div>
+          </div>
+          <div class="stat-roll-line" onclick="doRoll('str',null)" role="button">
+            <span class="stat-roll-text" id="str-roll">d20</span>
+          </div>
+          <div class="skills-list">
+            <div class="skill-row" onclick="doRoll('str','ath')" role="button"><span class="skill-name">Athletics</span><div class="skill-mods"><span class="skill-base-mod" id="ath-mod"></span><span class="skill-sep" id="ath-sep">+</span><input class="prof-val" type="number" id="ath-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('ath','str');save()"><span class="prof-label" id="ath-label">prof</span></div><span class="skill-badge" id="ath-badge">+0</span></div>
+            <div class="skill-row" onclick="doRoll('str','itm')" role="button"><span class="skill-name">Intimidation</span><div class="skill-mods"><span class="skill-base-mod" id="itm-mod"></span><span class="skill-sep" id="itm-sep">+</span><input class="prof-val" type="number" id="itm-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('itm','str');save()"><span class="prof-label" id="itm-label">prof</span></div><span class="skill-badge" id="itm-badge">+0</span></div>
+            <div class="skill-row" onclick="doRoll('str','sur')" role="button"><span class="skill-name">Survival</span><div class="skill-mods"><span class="skill-base-mod" id="sur-mod"></span><span class="skill-sep" id="sur-sep">+</span><input class="prof-val" type="number" id="sur-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('sur','str');save()"><span class="prof-label" id="sur-label">prof</span></div><span class="skill-badge" id="sur-badge">+0</span></div>
+          </div>
+        </div>
+
+        <!-- MND — default 10 -->
+        <div class="stat-col">
+          <div class="stat-header">
+            <span class="stat-name">MND</span>
+            <div class="stat-val-wrap">
+              <input class="stat-val locked-field" type="number" id="mndVal" value="10" min="1" max="30" oninput="updateStat('mnd'); save()">
+            </div>
+          </div>
+          <div class="stat-roll-line" onclick="doRoll('mnd',null)" role="button">
+            <span class="stat-roll-text" id="mnd-roll">d20</span>
+          </div>
+          <div class="skills-list">
+            <div class="skill-row" onclick="doRoll('mnd','per')" role="button"><span class="skill-name">Perception</span><div class="skill-mods"><span class="skill-base-mod" id="per-mod"></span><span class="skill-sep" id="per-sep">+</span><input class="prof-val" type="number" id="per-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('per','mnd');save()"><span class="prof-label" id="per-label">prof</span></div><span class="skill-badge" id="per-badge">+0</span></div>
+            <div class="skill-row" onclick="doRoll('mnd','inv')" role="button"><span class="skill-name">Investigation</span><div class="skill-mods"><span class="skill-base-mod" id="inv-mod"></span><span class="skill-sep" id="inv-sep">+</span><input class="prof-val" type="number" id="inv-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('inv','mnd');save()"><span class="prof-label" id="inv-label">prof</span></div><span class="skill-badge" id="inv-badge">+0</span></div>
+            <div class="skill-row" onclick="doRoll('mnd','foc')" role="button"><span class="skill-name">Focus</span><div class="skill-mods"><span class="skill-base-mod" id="foc-mod"></span><span class="skill-sep" id="foc-sep">+</span><input class="prof-val" type="number" id="foc-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('foc','mnd');save()"><span class="prof-label" id="foc-label">prof</span></div><span class="skill-badge" id="foc-badge">+0</span></div>
+          </div>
+        </div>
+
+        <!-- SOL — default 10 -->
+        <div class="stat-col">
+          <div class="stat-header">
+            <span class="stat-name">SOL</span>
+            <div class="stat-val-wrap">
+              <input class="stat-val locked-field" type="number" id="solVal" value="10" min="1" max="30" oninput="updateStat('sol'); save()">
+            </div>
+          </div>
+          <div class="stat-roll-line" onclick="doRoll('sol',null)" role="button">
+            <span class="stat-roll-text" id="sol-roll">d20</span>
+          </div>
+          <div class="skills-list">
+            <div class="skill-row" onclick="doRoll('sol','com')" role="button"><span class="skill-name">Composure</span><div class="skill-mods"><span class="skill-base-mod" id="com-mod"></span><span class="skill-sep" id="com-sep">+</span><input class="prof-val" type="number" id="com-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('com','sol');save()"><span class="prof-label" id="com-label">prof</span></div><span class="skill-badge" id="com-badge">+0</span></div>
+            <div class="skill-row" onclick="doRoll('sol','itu')" role="button"><span class="skill-name">Intuition</span><div class="skill-mods"><span class="skill-base-mod" id="itu-mod"></span><span class="skill-sep" id="itu-sep">+</span><input class="prof-val" type="number" id="itu-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('itu','sol');save()"><span class="prof-label" id="itu-label">prof</span></div><span class="skill-badge" id="itu-badge">+0</span></div>
+            <div class="skill-row" onclick="doRoll('sol','inf')" role="button"><span class="skill-name">Influence</span><div class="skill-mods"><span class="skill-base-mod" id="inf-mod"></span><span class="skill-sep" id="inf-sep">+</span><input class="prof-val" type="number" id="inf-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('inf','sol');save()"><span class="prof-label" id="inf-label">prof</span></div><span class="skill-badge" id="inf-badge">+0</span></div>
+          </div>
+        </div>
+
+        <!-- DEF — default 10 -->
+        <div class="stat-col">
+          <div class="stat-header">
+            <span class="stat-name">DEF</span>
+            <div class="stat-val-wrap">
+              <input class="stat-val locked-field" type="number" id="defVal" value="10" min="1" max="30" oninput="updateStat('def'); updateACDisplay(); updateInitDisplay(); save()">
+            </div>
+          </div>
+          <div class="stat-roll-line" onclick="doRoll('def',null)" role="button">
+            <span class="stat-roll-text" id="def-roll">d20</span>
+          </div>
+          <div class="skills-list">
+            <div class="skill-row" onclick="doRoll('def','eva')" role="button"><span class="skill-name">Evasion</span><div class="skill-mods"><span class="skill-base-mod" id="eva-mod"></span><span class="skill-sep" id="eva-sep">+</span><input class="prof-val" type="number" id="eva-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('eva','def');save()"><span class="prof-label" id="eva-label">prof</span></div><span class="skill-badge" id="eva-badge">+0</span></div>
+            <div class="skill-row" onclick="doRoll('def','for')" role="button"><span class="skill-name">Fortitude</span><div class="skill-mods"><span class="skill-base-mod" id="for-mod"></span><span class="skill-sep" id="for-sep">+</span><input class="prof-val" type="number" id="for-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('for','def');save()"><span class="prof-label" id="for-label">prof</span></div><span class="skill-badge" id="for-badge">+0</span></div>
+            <div class="skill-row" onclick="doRoll('def','wil')" role="button"><span class="skill-name">Will</span><div class="skill-mods"><span class="skill-base-mod" id="wil-mod"></span><span class="skill-sep" id="wil-sep">+</span><input class="prof-val" type="number" id="wil-prof" placeholder="0" onclick="event.stopPropagation()" oninput="refreshZeroHidden();updateBadge('wil','def');save()"><span class="prof-label" id="wil-label">prof</span></div><span class="skill-badge" id="wil-badge">+0</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- end rolls-initiative-wrap -->
+
+
+  <!-- ABILITY + ACTIONS COMBINED -->
+  <div class="card" id="abilityCard">
+    <div class="ab-tab-bar">
+      <button class="ab-tab active" onclick="switchAbTab('ability')">Ability</button>
+      <button class="ab-tab"        onclick="switchAbTab('actions')">Actions</button>
+    </div>
+    <div class="ab-pane active" id="ab-ability">
+      <div id="abilityWidget" class="ability-widget-shell">
+        <div class="hollow-widget">
+
+          <div class="hw-title">Hollow — Embodiment EGG</div>
+          <p class="hw-desc">Sloan leaves her body and enters another. What can be possessed is anything Sloan believes has a soul. What has a soul is never defined — she has to find out herself.</p>
+
+          <div class="hw-divider"></div>
+
+          <div class="hw-section-label">While Possessing</div>
+          <p class="hw-desc">She sees, hears, and controls the host completely. Her own body stays exactly where she left it — limp, breathing, and completely unprotected. She has no control over it until she returns.</p>
+
+          <div class="hw-divider"></div>
+
+          <div class="hw-section-label">Entry</div>
+          <div class="hw-checks">
+            <div class="hw-check-row">
+              <div class="hw-check-state">Host is unconscious</div>
+              <div class="hw-check-result hw-free">No roll needed</div>
+            </div>
+            <div class="hw-check-row">
+              <div class="hw-check-state">Host is awake but unaware of Sloan</div>
+              <div class="hw-check-result">MND roll — need <span class="hw-threshold">12 or more</span></div>
+            </div>
+            <div class="hw-check-row">
+              <div class="hw-check-state">Host is aware of Sloan in any way</div>
+              <div class="hw-check-result">MND roll — need <span class="hw-threshold">17 or more</span></div>
+            </div>
+          </div>
+
+          <div class="hw-divider"></div>
+
+          <div class="hw-section-label">Leaving</div>
+          <p class="hw-desc">She can leave at any time but it takes about a minute. She cannot exit instantly to dodge damage. If the host dies or goes unconscious while she is inside, she is ejected immediately and takes <span class="hw-em">1d8 damage</span>. One host at a time — leaving ends control immediately.</p>
+
+          <div class="hw-divider"></div>
+
+          <div class="hw-section-label">Embodiment Hosts</div>
+          <p class="hw-desc">If the host has an Embodiment type ability, Sloan can use it while inside. She will know nothing about what it does or how it works. It cannot harm her soul.</p>
+
+        </div>
+      </div>
+    </div>
+    <div class="ab-pane" id="ab-actions">
+
+      <!-- DEFAULT ACTIONS — hardcoded, never saved, never editable -->
+      <div class="actions-section-label">Standard Actions</div>
+      <div id="defaultActionsList"></div>
+
+      <div class="actions-divider"></div>
+
+      <!-- CUSTOM ACTIONS — player-added, editable, saved -->
+      <div class="actions-section-label">Custom Actions</div>
+      <div id="actionsList"></div>
+      <button class="add-btn" onclick="addCustomAction()">+ Add Action</button>
+    </div>
+  </div>
+
+
+  <!-- INVENTORY + CONDITIONS -->
+  <div class="card">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div class="card-title">Inventory</div>
+        <div class="inv-header">
+          <span class="col-label">Item</span>
+          <span class="col-label">Qty</span>
+          <span></span>
+        </div>
+        <div id="invList"></div>
+        <button class="add-btn" onclick="addItem()">+ Add Item</button>
+      </div>
+      <div>
+        <div class="card-title">Conditions</div>
+        <textarea class="plain-textarea" id="conditionsText" placeholder="Active conditions..." oninput="save()"></textarea>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- LORE -->
+  <div class="card lore-card">
+    <div class="card-title lore-toggle" onclick="toggleLore()">
+      Lore <span class="lore-chevron" id="loreChevron">▼</span>
+    </div>
+    <div class="lore-body" id="loreBody">
+      <div class="sloan-lore">
+        <p>Sloan's parents have been addicted since she was little — drugs, alcohol, all of it. Not cruel, just completely absent. The kind of neglect where she could come home at 4am after crawling through abandoned buildings all night and nobody would even look up. <em>Nobody asked. Nobody noticed. Nobody cared.</em></p>
+        <p>She got bullied badly enough in elementary school to remember it years later. Middle school looked like it might be different — she found a friend group, let herself get comfortable, told them things about her home life and what it was actually like. <strong>They left. Then they told everyone.</strong> That was the last time Sloan let anyone that close. She decided it wouldn't happen again and she's held to it.</p>
+        <p>Grades dropped after that. She's smart — she knows she's smart — but she stopped being able to see the point. Why work toward a future she wasn't sure she'd have? So instead she just moved through days, one at a time, no plan, no people. The thing that actually lights her up is urban exploring. Abandoned buildings at 2am, paranormal investigations alone with a camera, stray cats that let her pet them. <em>She feeds every stray she finds. She always has something in her pockets for them.</em></p>
+        <p>She doesn't drink, doesn't smoke, won't touch anything her parents touch. That's a hard line and it doesn't move. She's incredibly awkward when people actually speak to her — which almost never happens, because she won't start it. She compares her problems to everyone else's and usually decides hers aren't serious enough to take up space. She's working on that. Slowly. Mostly by not working on it at all and just going out into the dark with a flashlight looking for something that goes bump.</p>
+        <div class="sloan-info">
+          <div class="sloan-info-row"><span class="sloan-info-key">pronouns</span><span class="sloan-info-val">they / she / any</span></div>
+          <div class="sloan-info-row"><span class="sloan-info-key">scent</span><span class="sloan-info-val">berries and petrichor</span></div>
+          <div class="sloan-info-row"><span class="sloan-info-key">clothes</span><span class="sloan-info-val">worn bunny shirt, falling apart at the seams</span></div>
+          <div class="sloan-info-row"><span class="sloan-info-key">personality</span><span class="sloan-info-val">deeply introverted · won't start conversations · compares her problems to everyone else's and decides they don't count · feeds every stray she finds</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<!-- Particle canvas -->
-<canvas id="bg-canvas"></canvas>
-
-<div class="content-wrap">
-
-  <!-- Header -->
-  <div class="header-card">
-    <div class="badge-row">
-      <div>
-        <div class="char-tag">// they · she · any //</div>
-        <div class="char-name">Sloan</div>
-        <div class="char-meta">Player: Lex</div>
-        <div class="char-meta tag">Embodiment EGG — Hollow</div>
-      </div>
-      <div class="badge">
-        <div class="badge-label">Level</div>
-        <div class="badge-value">01</div>
-      </div>
+<!-- NOTES -->
+<button class="notes-trigger" onclick="toggleNotes()">Notes</button>
+<div class="notes-page" id="notesPage">
+  <div class="notes-sidebar">
+    <div class="notes-sidebar-header">
+      <span class="notes-sidebar-title">Notes</span>
+      <button class="notes-add-doc" onclick="addDoc()">+</button>
     </div>
+    <div class="notes-doc-list" id="notesDocList"></div>
   </div>
-
-  <!-- Rolls -->
-  <div class="card">
-    <div class="sec-label">rolls</div>
-    <div class="rolls-grid">
-      <div class="roll-card">
-        <div class="roll-abbr">STR</div>
-        <div class="roll-mod">d20 - 1</div>
-        <div class="roll-note">physical attacks and actions</div>
-      </div>
-      <div class="roll-card">
-        <div class="roll-abbr">MND</div>
-        <div class="roll-mod">d20 + 2</div>
-        <div class="roll-note">intellectual and mental actions</div>
-      </div>
-      <div class="roll-card">
-        <div class="roll-abbr">SOL</div>
-        <div class="roll-mod">d20 + 2</div>
-        <div class="roll-note">belief, instinct, willpower</div>
-      </div>
+  <div class="notes-main">
+    <div class="notes-topbar">
+      <div class="notes-doc-title-wrap" id="notesTitleWrap"></div>
+      <button class="notes-back" onclick="toggleNotes()">← Back</button>
     </div>
+    <textarea class="notes-editor" id="notesEditor" placeholder="Start writing..."></textarea>
   </div>
-
-  <!-- Abilities -->
-  <div class="card">
-    <div class="sec-label">abilities</div>
-    <div class="abilities-grid">
-
-      <div class="ability full">
-        <div class="ability-header">
-          <span class="ability-tag">active</span>
-          <span class="ability-name">Possession</span>
-        </div>
-        <div class="ability-desc">Sloan vacates her body entirely and enters another person or animal. She sees, hears, and controls them completely while inside. Her body remains where she left it — limp, breathing, vulnerable.</div>
-        <div class="limits-label">limits</div>
-        <div class="limit-item"><div class="limit-dot"></div><div class="limit-text">Her own body is completely unprotected while possessing.</div></div>
-        <div class="limit-item"><div class="limit-dot"></div><div class="limit-text">Cannot possess someone actively resisting with full awareness.</div></div>
-        <div class="limit-item"><div class="limit-dot"></div><div class="limit-text">Forceful removal from a host causes disorientation and a temporary inability to repossess.</div></div>
-        <div class="limit-item"><div class="limit-dot"></div><div class="limit-text"><b>One host at a time</b> — leaving ends control immediately.</div></div>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Lore -->
-  <div class="card">
-    <div class="sec-label">lore</div>
-    <div class="lore-block">
-
-      <!-- characteristics -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.28rem 2rem;padding-bottom:.9rem;border-bottom:1px solid var(--border);">
-        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">pronouns</span><span style="color:var(--text-mid);">they · she · any</span></div>
-        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">age</span><span style="color:var(--text-mid);">late teens</span></div>
-        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">scent</span><span style="color:var(--text-mid);">berries and petrichor</span></div>
-        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">clothes</span><span style="color:var(--text-mid);">worn bunny shirt, falling apart at the seams</span></div>
-        <div style="display:flex;gap:.5rem;align-items:baseline;font-size:.65rem;grid-column:1/-1;"><span style="font-family:var(--font-mono);font-size:.52rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;flex-shrink:0;">personality</span><span style="color:var(--text-mid);">deeply introverted · won't start conversations · compares her problems to everyone else's and decides they don't count · hard line against anything her parents touch · feeds every stray she finds · always has something in her pockets for them</span></div>
-      </div>
-
-      <div class="lore-text">Sloan's parents have been addicted since she was little — drugs, alcohol, all of it. Not cruel, just completely absent. The kind of neglect where she could come home at 4am after crawling through abandoned buildings all night and nobody would even look up. <em>Nobody asked. Nobody noticed. Nobody cared.</em></div>
-      <div class="lore-text">She got bullied badly enough in elementary school to remember it years later. Middle school looked like it might be different — she found a friend group, let herself get comfortable, told them things about her home life and what it was actually like. <strong>They left. Then they told everyone.</strong> That was the last time Sloan let anyone that close. She decided it wouldn't happen again and she's held to it.</div>
-      <div class="lore-text">Grades dropped after that. She's smart — she knows she's smart — but she stopped being able to see the point. Why work toward a future she wasn't sure she'd have? So instead she just moved through days, one at a time, no plan, no people. The thing that actually lights her up is urban exploring. Abandoned buildings at 2am, paranormal investigations alone with a camera, stray cats that let her pet them. She feeds every stray animal she finds. She always has something in her pockets for them.</div>
-      <div class="lore-text">She doesn't drink, doesn't smoke, won't touch anything her parents touch. That's a hard line and it doesn't move. She's incredibly awkward when people actually speak to her — which almost never happens, because she won't start it. She compares her problems to everyone else's and usually decides hers aren't serious enough to take up space. She's working on that. Slowly. Mostly by not working on it at all and just going out into the dark with a flashlight looking for something that goes bump. <em>She smells like berries and petrichor and she's wearing a bunny shirt that's falling apart at the seams because she's worn it too many times to count.</em></div>
-
-      <!-- likes / dislikes -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding-top:.8rem;border-top:1px solid var(--border);">
-        <div>
-          <div style="font-family:var(--font-mono);font-size:.5rem;color:var(--text-dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.35rem;">likes</div>
-          <div style="display:flex;flex-direction:column;gap:.18rem;">
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Urban exploring</div>
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Stray animals</div>
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Paranormal investigation</div>
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>The dark</div>
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Rain</div>
-          </div>
-        </div>
-        <div>
-          <div style="font-family:var(--font-mono);font-size:.5rem;color:var(--text-dim);letter-spacing:.18em;text-transform:uppercase;margin-bottom:.35rem;">dislikes</div>
-          <div style="display:flex;flex-direction:column;gap:.18rem;">
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Crowds</div>
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Being noticed</div>
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Alcohol and drugs</div>
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Being spoken to first</div>
-            <div style="font-size:.64rem;color:var(--text-mid);padding-left:.75rem;position:relative;"><span style="position:absolute;left:0;color:var(--text-dim);">·</span>Loud spaces</div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="footer">
-    stats update on level up only<span></span>post-collapse 2004<span></span>embodiment egg
-  </div>
-
 </div>
 
 <script>
-// ═══════════════════════════════════════
-// Floating particle system — ghost orbs
-// inspired by React Bits particle style
-// ═══════════════════════════════════════
-const canvas = document.getElementById('bg-canvas');
-const ctx = canvas.getContext('2d');
+// ── SLOAN DEFAULTS ──
+const CHAR_DEFAULTS = {
+  name:        'Sloan',
+  player:      'Lex',
+  str:         9,
+  mnd:         14,
+  sol:         14,
+  def:         10,
+  hp:          10,
+  hpMax:       10,
+  level:       1,
+  powerCat:    'Embodiment',
+  powerType:   'EGG',
+  abilityName: 'Hollow',
+};
 
-let W, H, particles = [];
+const SAVE_KEY = 'sloan_sheet_v1';
 
-function resize() {
-  W = canvas.width  = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-}
-resize();
-window.addEventListener('resize', () => { resize(); init(); });
-
-class Particle {
-  constructor() { this.reset(true); }
-  reset(initial) {
-    this.x  = Math.random() * W;
-    this.y  = initial ? Math.random() * H : H + 20;
-    this.r  = Math.random() * 2.2 + .4;
-    this.vx = (Math.random() - .5) * .25;
-    this.vy = -(Math.random() * .5 + .15);
-    this.life = 0;
-    this.maxLife = Math.random() * 400 + 200;
-    // purple palette
-    const hues = [265, 275, 255, 285, 245];
-    this.hue = hues[Math.floor(Math.random() * hues.length)];
-    this.sat = Math.random() * 30 + 55;
-    this.lum = Math.random() * 25 + 55;
-  }
-  update() {
-    this.x  += this.vx + Math.sin(this.life * .018) * .18;
-    this.y  += this.vy;
-    this.life++;
-    if (this.life > this.maxLife || this.y < -20) this.reset(false);
-  }
-  draw() {
-    const t = this.life / this.maxLife;
-    const alpha = t < .2 ? t / .2 : t > .8 ? (1 - t) / .2 : 1;
-    ctx.beginPath();
-    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r * 3);
-    grd.addColorStop(0, `hsla(${this.hue},${this.sat}%,${this.lum}%,${alpha * .55})`);
-    grd.addColorStop(1, `hsla(${this.hue},${this.sat}%,${this.lum}%,0)`);
-    ctx.fillStyle = grd;
-    ctx.arc(this.x, this.y, this.r * 3, 0, Math.PI * 2);
-    ctx.fill();
-  }
+// ══════════════════════════════════════════
+// ABILITY / ACTIONS TABS
+// ══════════════════════════════════════════
+function switchAbTab(tab) {
+  document.querySelectorAll('.ab-tab').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'ability') || (i === 1 && tab === 'actions'));
+  });
+  document.getElementById('ab-ability').classList.toggle('active', tab === 'ability');
+  document.getElementById('ab-actions').classList.toggle('active', tab === 'actions');
 }
 
-function init() {
-  particles = [];
-  const count = Math.floor((W * H) / 8000);
-  for (let i = 0; i < count; i++) particles.push(new Particle());
-}
-init();
+// ══════════════════════════════════════════
+// EDIT MODE
+// locked-field inputs are pointer-events:none when not editing
+// body.editing enables them via CSS
+// ══════════════════════════════════════════
+let editMode = false;
 
-// slow drifting large ghost orbs
-class GhostOrb {
-  constructor() { this.reset(true); }
-  reset(initial) {
-    this.x = Math.random() * W;
-    this.y = initial ? Math.random() * H : H + 100;
-    this.r = Math.random() * 60 + 30;
-    this.vx = (Math.random() - .5) * .12;
-    this.vy = -(Math.random() * .2 + .05);
-    this.life = 0;
-    this.maxLife = Math.random() * 800 + 500;
-    this.hue = Math.random() < .6 ? 265 : 255;
-  }
-  update() {
-    this.x += this.vx + Math.sin(this.life * .008) * .3;
-    this.y += this.vy;
-    this.life++;
-    if (this.life > this.maxLife || this.y < -120) this.reset(false);
-  }
-  draw() {
-    const t = this.life / this.maxLife;
-    const alpha = t < .3 ? t / .3 : t > .7 ? (1 - t) / .3 : 1;
-    const grd = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.r);
-    grd.addColorStop(0, `hsla(${this.hue},60%,65%,${alpha * .06})`);
-    grd.addColorStop(.5, `hsla(${this.hue},55%,55%,${alpha * .03})`);
-    grd.addColorStop(1, `hsla(${this.hue},50%,50%,0)`);
-    ctx.beginPath();
-    ctx.fillStyle = grd;
-    ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-    ctx.fill();
-  }
+function toggleEdit() {
+  editMode = !editMode;
+  const btn = document.getElementById('editBtn');
+  btn.textContent = editMode ? 'Done' : 'Edit';
+  btn.classList.toggle('active', editMode);
+  document.body.classList.toggle('editing', editMode);
+
+  // Initiative bonus buttons follow edit mode
+  document.querySelectorAll('.init-adj-btn').forEach(b => {
+    b.classList.toggle('hidden-ctrl', !editMode);
+  });
+
+  if (!editMode) save();
+  refreshZeroHidden();
 }
 
-const orbs = [];
-for (let i = 0; i < 8; i++) orbs.push(new GhostOrb());
+// ══════════════════════════════════════════
+// SAVE / LOAD  (localStorage)
+// ══════════════════════════════════════════
+function save() {
+  const profs = {};
+  ['ath','itm','sur','per','inv','foc','com','itu','inf','eva','for','wil'].forEach(sk => {
+    const el = document.getElementById(sk + '-prof');
+    if (el) profs[sk] = el.value;
+  });
 
-function frame() {
-  ctx.clearRect(0, 0, W, H);
-  orbs.forEach(o => { o.update(); o.draw(); });
-  particles.forEach(p => { p.update(); p.draw(); });
-  requestAnimationFrame(frame);
+  const items = [];
+  document.querySelectorAll('#invList .inv-row').forEach(row => {
+    const inputs = row.querySelectorAll('input');
+    items.push({ name: inputs[0].value, qty: inputs[1].value });
+  });
+
+  const data = {
+    charName:    document.getElementById('charName').value,
+    playerName:  document.getElementById('playerName').value,
+    powerCat:    document.getElementById('powerCat').value,
+    powerType:   document.getElementById('powerType').value,
+    abilityName: document.getElementById('abilityName').value,
+    currentHp:   document.getElementById('currentHp').value,
+    maxHp:       document.getElementById('maxHp').value,
+    level:       document.getElementById('levelVal').value,
+    ac:          document.getElementById('acVal').value,
+    str: document.getElementById('strVal').value,
+    mnd: document.getElementById('mndVal').value,
+    sol: document.getElementById('solVal').value,
+    def: document.getElementById('defVal').value,
+    initBonus,
+    profs,
+    items,
+    conditions:  document.getElementById('conditionsText').value,
+    loreOpen:    document.getElementById('loreBody').classList.contains('open'),
+    image:       localStorage.getItem(SAVE_KEY + '_img') || null,
+  };
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {}
 }
-frame();
 
-// Splash cursor — React Bits style ghost trail
-const trails = [];
-window.addEventListener('mousemove', e => {
-  for (let i = 0; i < 2; i++) {
-    trails.push({
-      x: e.clientX + (Math.random()-0.5)*10,
-      y: e.clientY + (Math.random()-0.5)*10,
-      r: Math.random()*8+3,
-      life: 1,
-      hue: 260 + Math.random()*30,
+function load() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch(e) {}
+  if (!data) { data = {}; }
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
+  set('charName',    CHAR_DEFAULTS.name);
+  set('playerName',  CHAR_DEFAULTS.player);
+  set('abilityName', CHAR_DEFAULTS.abilityName);
+  set('strVal',      CHAR_DEFAULTS.str);
+  set('mndVal',      CHAR_DEFAULTS.mnd);
+  set('solVal',      CHAR_DEFAULTS.sol);
+  set('defVal',      CHAR_DEFAULTS.def);
+  set('levelVal',    CHAR_DEFAULTS.level);
+  const cat = document.getElementById('powerCat');
+  const typ = document.getElementById('powerType');
+  if (cat) [...cat.options].forEach(o => { o.selected = o.value === CHAR_DEFAULTS.powerCat; });
+  if (typ) [...typ.options].forEach(o => { o.selected = o.value === CHAR_DEFAULTS.powerType; });
+  set('currentHp',      data?.currentHp ?? CHAR_DEFAULTS.hp);
+  set('maxHp',          data?.hpMax     ?? CHAR_DEFAULTS.hpMax);
+  set('acVal',          data?.ac);
+  set('conditionsText', data?.conditions);
+
+  if (data.profs) {
+    Object.entries(data.profs).forEach(([sk, val]) => {
+      const el = document.getElementById(sk + '-prof');
+      if (el) el.value = val;
     });
   }
-  if (trails.length > 80) trails.splice(0, trails.length-80);
-});
-// Draw trails on top of existing frame — inject into requestAnimationFrame
-const _origFrame = frame;
-function frameWithTrail() {
-  // trails drawn on bg-canvas after everything else
-  trails.forEach((t,i) => {
-    const grd = ctx.createRadialGradient(t.x,t.y,0,t.x,t.y,t.r);
-    grd.addColorStop(0,`hsla(${t.hue},70%,70%,${t.life*.25})`);
-    grd.addColorStop(1,`hsla(${t.hue},70%,60%,0)`);
-    ctx.beginPath();
-    ctx.arc(t.x,t.y,t.r,0,Math.PI*2);
-    ctx.fillStyle=grd; ctx.fill();
-    t.life -= 0.04; t.r *= 0.96;
+
+  if (data.items && data.items.length) {
+    data.items.forEach(item => addItem(item.name, item.qty));
+  }
+
+  if (data.loreOpen) {
+    document.getElementById('loreBody').classList.add('open');
+    document.getElementById('loreChevron').classList.add('open');
+  }
+
+  if (data.initBonus !== undefined) {
+    initBonus = data.initBonus;
+    updateInitDisplay();
+  }
+
+  // restore image
+  const savedImg = localStorage.getItem(SAVE_KEY + '_img');
+  if (savedImg) showImage(savedImg);
+
+  ['str','mnd','sol','def'].forEach(s => updateStat(s));
+  updateACDisplay();
+  updateInitDisplay();
+  refreshZeroHidden();
+}
+
+// ══════════════════════════════════════════
+// ZERO-HIDING
+// Hides any skill mod, prof, sep, and label
+// that are zero when not in edit mode.
+// ══════════════════════════════════════════
+const ALL_SKILLS = ['ath','itm','sur','per','inv','foc','com','itu','inf','eva','for','wil'];
+const SKILL_STAT = {
+  ath:'str', itm:'str', sur:'str',
+  per:'mnd', inv:'mnd', foc:'mnd',
+  com:'sol', itu:'sol', inf:'sol',
+  eva:'def', for:'def', wil:'def'
+};
+
+function updateBadge(sk, stat) {
+  const badge  = document.getElementById(sk + '-badge');
+  if (!badge) return;
+  const mod    = getStatMod(stat);
+  const prof   = parseInt(document.getElementById(sk + '-prof')?.value) || 0;
+  const total  = mod + prof;
+  badge.textContent = total >= 0 ? `+${total}` : `${total}`;
+  badge.style.color = total > 0 ? 'var(--accent)' : total < 0 ? 'var(--red)' : 'var(--text)';
+}
+
+function refreshZeroHidden() {
+  ALL_SKILLS.forEach(sk => {
+    const modEl   = document.getElementById(sk + '-mod');
+    const profEl  = document.getElementById(sk + '-prof');
+    const sepEl   = document.getElementById(sk + '-sep');
+    const labelEl = document.getElementById(sk + '-label');
+    if (!modEl || !profEl) return;
+
+    const stat    = SKILL_STAT[sk];
+    const mod     = getStatMod(stat);
+    const prof    = parseInt(profEl.value) || 0;
+    const modZero  = mod === 0;
+    const profZero = prof === 0;
+
+    modEl.classList.toggle('hide',   modZero  && !editMode);
+    profEl.classList.toggle('hide',  profZero && !editMode);
+    if (sepEl)   sepEl.classList.toggle('hide',   (modZero && profZero) && !editMode);
+    if (labelEl) labelEl.classList.toggle('hide',  profZero && !editMode);
+    modEl.textContent = modZero ? '' : (mod > 0 ? `+${mod}` : `${mod}`);
+
+    updateBadge(sk, stat);
   });
-  trails.splice(0, trails.filter(t=>t.life<=0).length || 0);
-  for(let i=trails.length-1;i>=0;i--){if(trails[i].life<=0)trails.splice(i,1);}
 }
-const originalRAF = requestAnimationFrame;
-// Patch the frame loop
-function frameWithCursor() {
-  ctx.clearRect(0,0,W,H);
-  orbs.forEach(o=>{o.update();o.draw();});
-  particles.forEach(p=>{p.update();p.draw();});
-  frameWithTrail();
-  requestAnimationFrame(frameWithCursor);
+const STAT_SKILLS = {
+  str: ['ath','itm','sur'],
+  mnd: ['per','inv','foc'],
+  sol: ['com','itu','inf'],
+  def: ['eva','for','wil']
+};
+
+function getStatMod(statKey) {
+  const val = parseInt(document.getElementById(statKey + 'Val').value) || 10;
+  return Math.floor((val - 10) / 2);
 }
-frameWithCursor();
+
+function updateStat(stat) {
+  const mod  = getStatMod(stat);
+  const sign = mod >= 0 ? '+' : '−';
+  const abs  = Math.abs(mod);
+  const rollEl = document.getElementById(stat + '-roll');
+  rollEl.textContent = mod === 0 ? 'd20' : `d20 ${sign} ${abs}`;
+  STAT_SKILLS[stat].forEach(sk => {
+    const el = document.getElementById(sk + '-mod');
+    el.textContent = mod === 0 ? '' : (mod > 0 ? `+${mod}` : `${mod}`);
+  });
+  refreshZeroHidden();
+  refreshDefaultActions();
+}
+
+// ══════════════════════════════════════════
+// FAIR RNG — uses crypto.getRandomValues
+// Same method as Roll20, D&D Beyond, etc.
+// Rejection sampling ensures perfect uniform
+// distribution with zero modulo bias.
+// ══════════════════════════════════════════
+function rollD20() {
+  // Rejection sampling: only accept values in [0, floor(0xFFFFFFFF/20)*20)
+  // This eliminates modulo bias entirely.
+  const max = Math.floor(0xFFFFFFFF / 20) * 20;
+  const buf = new Uint32Array(1);
+  let val;
+  do { crypto.getRandomValues(buf); val = buf[0]; } while (val >= max);
+  return (val % 20) + 1;
+}
+
+// ══════════════════════════════════════════
+// TOAST STACK — stacking slide-up notifications
+// ══════════════════════════════════════════
+function showToast(rolled, total, label) {
+  const stack  = document.getElementById('toastStack');
+  if (!stack) return;
+  const isCrit = rolled === 20;
+  const isFail = rolled === 1;
+  const hasModifier = rolled !== total;
+
+  const item = document.createElement('div');
+  item.className = 'toast-item';
+  item.innerHTML = `
+    <div class="toast-info">
+      <div class="toast-total-row">
+        <span class="toast-total${isCrit?' crit':isFail?' fail':''}">${total}</span>
+        ${hasModifier ? `<span class="toast-rolled">(${rolled})</span>` : ''}
+      </div>
+      <span class="toast-label" style="color:${isCrit?'#f0c040':isFail?'var(--red)':''}">${isCrit?'✦ Nat 20':isFail?'✦ Nat 1':label}</span>
+    </div>`;
+
+  stack.appendChild(item);
+
+  // Cap at 6 — remove oldest if over
+  const items = stack.querySelectorAll('.toast-item');
+  if (items.length > 6) {
+    const oldest = items[0];
+    oldest.classList.add('hide');
+    oldest.addEventListener('transitionend', () => oldest.remove(), { once: true });
+  }
+
+  requestAnimationFrame(() => { requestAnimationFrame(() => item.classList.add('show')); });
+
+  setTimeout(() => {
+    item.classList.add('hide');
+    item.addEventListener('transitionend', () => item.remove(), { once: true });
+  }, 15000);
+}
+
+// ══════════════════════════════════════════
+// DICE ROLLER
+// ══════════════════════════════════════════
+const diceCounts = { d20:0, d12:0, d10:0, d8:0, d6:0, d4:0, d100:0 };
+const diceSides  = { d20:20, d12:12, d10:10, d8:8, d6:6, d4:4, d100:100 };
+
+function fairDie(sides) {
+  const max = Math.floor(0xFFFFFFFF / sides) * sides;
+  const buf = new Uint32Array(1);
+  let v; do { crypto.getRandomValues(buf); v = buf[0]; } while (v >= max);
+  return (v % sides) + 1;
+}
+
+function toggleDicePanel() {
+  const panel = document.getElementById('dicePanel');
+  const btn   = document.getElementById('diceBtn');
+  panel.classList.toggle('open');
+  btn.classList.toggle('active', panel.classList.contains('open'));
+}
+
+function selectDie(key, sides) {
+  diceCounts[key]++;
+  const cnt = document.getElementById('cnt-' + key);
+  const die = document.getElementById('die-' + key);
+  cnt.textContent = diceCounts[key] > 1 ? diceCounts[key] : '';
+  cnt.classList.toggle('visible', diceCounts[key] > 1);
+  die.classList.add('selected');
+}
+
+function resetDice() {
+  Object.keys(diceCounts).forEach(k => {
+    diceCounts[k] = 0;
+    const cnt = document.getElementById('cnt-' + k);
+    const die = document.getElementById('die-' + k);
+    if (cnt) { cnt.textContent = '0'; cnt.classList.remove('visible'); }
+    if (die)   die.classList.remove('selected');
+  });
+}
+
+function rollDice() {
+  const rolls = [];
+  const parts = [];
+  Object.entries(diceCounts).forEach(([key, count]) => {
+    if (!count) return;
+    const sides = diceSides[key];
+    for (let i = 0; i < count; i++) {
+      const r = fairDie(sides);
+      rolls.push(r);
+      parts.push(`${key}:${r}`);
+    }
+  });
+  if (!rolls.length) return;
+
+  const total = rolls.reduce((a, b) => a + b, 0);
+  // show the sum as "total" and first roll as the displayed die face
+  const label = parts.join(' + ');
+  // For a single die, show the result; for multi show sum
+  const displayed = rolls.length === 1 ? rolls[0] : total;
+  showToast(rolls[0], total, label);
+  resetDice();
+  // close panel after rolling
+  document.getElementById('dicePanel').classList.remove('open');
+  document.getElementById('diceBtn').classList.remove('active');
+}
+
+// ══════════════════════════════════════════
+// ROLLS
+// ══════════════════════════════════════════
+function doRoll(stat, skill) {
+  const d20   = rollD20();
+  const mod   = getStatMod(stat);
+  const prof  = skill ? (parseInt(document.getElementById(skill + '-prof').value) || 0) : 0;
+  const total = d20 + mod + prof;
+  const label = skill
+    ? document.querySelector(`#${skill}-prof`)?.closest('.skill-row')?.querySelector('.skill-name')?.textContent || stat.toUpperCase()
+    : stat.toUpperCase();
+  showToast(d20, total, label);
+}
+
+// ══════════════════════════════════════════
+// INITIATIVE — base = DEF mod (DEX substitute)
+// ══════════════════════════════════════════
+let initBonus = 0;
+
+function updateInitDisplay() {
+  const defMod   = getStatMod('def');
+  const total    = defMod + initBonus;
+  const formulaEl = document.getElementById('init-formula');
+  if (formulaEl) formulaEl.textContent = `${total >= 0 ? '+' : ''}${total}`;
+  const bonusEl  = document.getElementById('initBonusDisplay');
+  if (bonusEl) bonusEl.textContent = initBonus === 0 ? '' : (initBonus > 0 ? `+${initBonus}` : `${initBonus}`);
+}
+
+function adjustInitBonus(dir) {
+  initBonus += dir;
+  updateInitDisplay();
+  save();
+}
+
+function updateACDisplay() {
+  const defMod   = getStatMod('def');
+  const override = parseInt(document.getElementById('acVal').value);
+  const derived  = 10 + defMod;
+  const el = document.getElementById('acDerived');
+  if (el) el.textContent = !isNaN(override) ? override : derived;
+}
+
+function doInitRoll() {
+  const defMod = getStatMod('def');
+  const d20    = rollD20();
+  const total  = d20 + defMod + initBonus;
+  showToast(d20, total, 'Initiative');
+}
+
+// ══════════════════════════════════════════
+// HP
+// ══════════════════════════════════════════
+let flashTimer = null;
+
+function adjustHp(dir) {
+  const amt = parseInt(document.getElementById('hpAmount').value) || 1;
+  const cur = document.getElementById('currentHp');
+  const max = parseInt(document.getElementById('maxHp').value) || Infinity;
+  cur.value = dir === 1
+    ? Math.min(max, (parseInt(cur.value) || 0) + amt)
+    : Math.max(0, (parseInt(cur.value) || 0) - amt);
+  const fl = document.getElementById('hpFlash');
+  fl.textContent = (dir === 1 ? '+' : '−') + amt;
+  fl.className   = 'hp-flash ' + (dir === 1 ? 'pos' : 'neg');
+  clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => { fl.textContent = ''; fl.className = 'hp-flash'; }, 1500);
+  save();
+}
+
+function clampHp() {
+  const cur = document.getElementById('currentHp');
+  const max = parseInt(document.getElementById('maxHp').value);
+  if (!isNaN(max) && parseInt(cur.value) > max) cur.value = max;
+}
+
+// ══════════════════════════════════════════
+// IMAGE UPLOAD
+// ══════════════════════════════════════════
+function loadImage(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    try { localStorage.setItem(SAVE_KEY + '_img', dataUrl); } catch(e) {
+      console.warn('Image too large to save to localStorage');
+    }
+    showImage(dataUrl);
+  };
+  reader.readAsDataURL(file);
+}
+
+function showImage(dataUrl) {
+  const preview     = document.getElementById('imgPreview');
+  const placeholder = document.getElementById('imgPlaceholder');
+  const overlay     = document.getElementById('imgOverlay');
+  preview.src = dataUrl;
+  preview.classList.add('loaded');
+  placeholder.style.display = 'none';
+  overlay.style.display     = 'flex';
+}
+
+// ══════════════════════════════════════════
+// INVENTORY
+// ══════════════════════════════════════════
+function addItem(name = '', qty = '') {
+  const d = document.createElement('div');
+  d.className = 'inv-row';
+  d.innerHTML = `<input type="text" placeholder="Item name" value="${name}" oninput="save()"><input type="number" placeholder="1" value="${qty}" style="text-align:center;" oninput="save()"><button class="rm-btn" onclick="this.parentElement.remove(); save()">✕</button>`;
+  document.getElementById('invList').appendChild(d);
+}
+
+// ══════════════════════════════════════════
+// LORE
+// ══════════════════════════════════════════
+function toggleLore() {
+  document.getElementById('loreBody').classList.toggle('open');
+  document.getElementById('loreChevron').classList.toggle('open');
+  save();
+}
+
+// ══════════════════════════════════════════
+// NOTES
+// ══════════════════════════════════════════
+const NOTES_KEY = 'secret_side_notes_v3';
+let docs = [], activeDocId = null, notesOpen = false, docIdCounter = 0, dragSrcIdx = null;
+
+function saveNoteDocs() { try { localStorage.setItem(NOTES_KEY, JSON.stringify({ docs, activeDocId, docIdCounter })); } catch(e) {} }
+function loadNoteDocs() {
+  try { const d = JSON.parse(localStorage.getItem(NOTES_KEY)); if (d) { docs = d.docs || []; activeDocId = d.activeDocId || null; docIdCounter = d.docIdCounter || 0; } } catch(e) {}
+  if (!docs.length) addDoc(true); else renderSidebar();
+  openDoc(activeDocId || docs[0]?.id);
+}
+function toggleNotes() { notesOpen = !notesOpen; document.getElementById('notesPage').classList.toggle('open', notesOpen); }
+function addDoc(silent) {
+  const id = ++docIdCounter;
+  docs.push({ id, title: 'Note ' + (docs.length + 1), content: '' });
+  saveNoteDocs(); renderSidebar();
+  if (!silent) openDoc(id);
+}
+function openDoc(id) {
+  saveCurrentDoc(); activeDocId = id;
+  const doc = docs.find(d => d.id === id); if (!doc) return;
+  document.getElementById('notesEditor').value = doc.content;
+  renderSidebar(); renderTitleBar(doc); saveNoteDocs();
+}
+function saveCurrentDoc() {
+  if (!activeDocId) return;
+  const doc = docs.find(d => d.id === activeDocId);
+  if (doc) doc.content = document.getElementById('notesEditor').value;
+}
+document.getElementById('notesEditor').addEventListener('input', () => { saveCurrentDoc(); saveNoteDocs(); });
+function renderTitleBar(doc) {
+  const wrap = document.getElementById('notesTitleWrap');
+  wrap.innerHTML = `<input class="notes-title-input" id="activeTitleInput" value="${doc.title}" placeholder="Untitled">`;
+  document.getElementById('activeTitleInput').addEventListener('input', e => { doc.title = e.target.value || 'Untitled'; saveNoteDocs(); renderSidebar(); });
+}
+function renderSidebar() {
+  const list = document.getElementById('notesDocList'); list.innerHTML = '';
+  docs.forEach((doc, idx) => {
+    const item = document.createElement('div');
+    item.className = 'notes-doc-item' + (doc.id === activeDocId ? ' active' : '');
+    item.draggable = true;
+    item.innerHTML = `<span class="notes-doc-name" ondblclick="startRenameDoc(${doc.id},this)">${doc.title}</span><button class="notes-doc-del" onclick="deleteDoc(${doc.id});event.stopPropagation()">✕</button>`;
+    item.addEventListener('click', () => openDoc(doc.id));
+    item.addEventListener('dragstart', e => { dragSrcIdx = idx; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => item.classList.add('dragging'), 0); });
+    item.addEventListener('dragend',   () => item.classList.remove('dragging'));
+    item.addEventListener('dragover',  e => { e.preventDefault(); item.classList.add('drag-over'); });
+    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+    item.addEventListener('drop', e => { e.preventDefault(); item.classList.remove('drag-over'); if (dragSrcIdx === null || dragSrcIdx === idx) return; const moved = docs.splice(dragSrcIdx,1)[0]; docs.splice(idx,0,moved); dragSrcIdx=null; saveNoteDocs(); renderSidebar(); });
+    list.appendChild(item);
+  });
+}
+function startRenameDoc(id, el) {
+  const doc = docs.find(d => d.id === id); if (!doc) return;
+  const inp = document.createElement('input');
+  inp.className = 'notes-doc-rename-input'; inp.value = doc.title;
+  el.replaceWith(inp); inp.focus(); inp.select();
+  const done = () => { doc.title = inp.value.trim() || doc.title; saveNoteDocs(); renderSidebar(); if (doc.id === activeDocId) renderTitleBar(doc); };
+  inp.addEventListener('blur', done);
+  inp.addEventListener('keydown', e => { if (e.key==='Enter') inp.blur(); e.stopPropagation(); });
+  inp.addEventListener('click', e => e.stopPropagation());
+}
+function deleteDoc(id) {
+  if (docs.length <= 1) { docs[0].title='Note 1'; docs[0].content=''; saveNoteDocs(); renderSidebar(); openDoc(docs[0].id); return; }
+  const idx = docs.findIndex(d => d.id === id); docs.splice(idx,1);
+  if (activeDocId === id) openDoc(docs[Math.max(0,idx-1)].id);
+  saveNoteDocs(); renderSidebar();
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+
+
+// ══════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════
+let actionIdCounter = 0;
+
+// Render a read-only default action row
+// Re-render roll display text on default actions when stats change
+function refreshDefaultActions() {
+  document.querySelectorAll('#defaultActionsList .action-row').forEach(row => {
+    const atk = row.dataset.atk;
+    const dmg = row.dataset.dmg;
+    const spans = row.querySelectorAll('.action-roll-text');
+    let i = 0;
+    if (atk) { if (spans[i]) spans[i].textContent = resolveExprDisplay(atk); i++; }
+    if (dmg) { if (spans[i]) spans[i].textContent = resolveExprDisplay(dmg); }
+  });
+}
+
+function resolveExprDisplay(expr) {
+  if (!expr) return '';
+  const statMap = { STR: 'str', MND: 'mnd', SOL: 'sol', DEF: 'def' };
+  let display = expr;
+  Object.entries(statMap).forEach(([kw, stat]) => {
+    if (expr.toUpperCase().includes(kw)) {
+      const mod = getStatMod(stat);
+      const sign = mod >= 0 ? `+${mod}` : `${mod}`;
+      display = display.replace(new RegExp(kw, 'gi'), sign);
+    }
+  });
+  return display;
+}
+
+function renderDefaultAction(d) {
+  const id  = ++actionIdCounter;
+  const row = document.createElement('div');
+  row.className  = 'action-row default-row';
+  row.dataset.id = id;
+  row.dataset.atk = d.atk || '';
+  row.dataset.dmg = d.dmg || '';
+  const hasAtk = d.atk && d.atk !== '';
+  const hasDmg = d.dmg && d.dmg !== '';
+  const atkDisplay = hasAtk ? resolveExprDisplay(d.atk) : '';
+  const dmgDisplay = hasDmg ? resolveExprDisplay(d.dmg) : '';
+  row.innerHTML = `
+    <div class="action-main">
+      <div class="action-header">
+        <span class="action-name-text">${d.name}</span>
+      </div>
+      <span class="action-flavor">${d.flavor}</span>
+      <span class="action-notes-text">${d.notes}</span>
+    </div>
+    <div class="action-rolls">
+      ${hasAtk ? `<div class="action-roll-wrap">
+        <span class="action-roll-label">Atk</span>
+        <span class="action-roll-text">${atkDisplay}</span>
+        <button class="action-roll-btn" onclick="rollDefaultAction(${id},'atk')">Roll</button>
+      </div>` : ''}
+      ${hasDmg ? `<div class="action-roll-wrap">
+        <span class="action-roll-label">Dmg</span>
+        <span class="action-roll-text">${dmgDisplay}</span>
+        <button class="action-roll-btn" onclick="rollDefaultAction(${id},'dmg')">Roll</button>
+      </div>` : ''}
+    </div>`;
+  document.getElementById('defaultActionsList').appendChild(row);
+}
+
+// Parse a dice expression: "2d6+3", "d20+STR", "d20+0" etc.
+// STR/MND/SOL/DEF keywords resolve to current stat mods.
+function parseDiceExpr(expr) {
+  let str = expr.trim().toUpperCase();
+  const statMap = { STR: 'str', MND: 'mnd', SOL: 'sol', DEF: 'def' };
+  Object.entries(statMap).forEach(([kw, stat]) => {
+    const mod = getStatMod(stat);
+    str = str.replace(new RegExp(kw, 'g'), mod >= 0 ? `+${mod}` : `${mod}`);
+  });
+  const diceRegex = /(\d*)D(\d+)/g;
+  let total = 0, rolls = [], breakdown = [], match, flat = str;
+  while ((match = diceRegex.exec(str)) !== null) {
+    const count = parseInt(match[1]) || 1;
+    const sides = parseInt(match[2]);
+    const these = [];
+    for (let i = 0; i < count; i++) these.push(fairDie(sides));
+    const sum = these.reduce((a,b) => a+b, 0);
+    total += sum; rolls.push(...these);
+    breakdown.push(`${count}d${sides}[${these.join(',')}]`);
+    flat = flat.replace(match[0], '');
+  }
+  flat = flat.replace(/\s/g, '');
+  if (flat && flat !== '+' && flat !== '-') {
+    try { total += Function('"use strict";return (' + flat + ')')(); } catch(e) {}
+  }
+  return { total, breakdown: breakdown.join(' + '), firstRoll: rolls[0] ?? null };
+}
+
+function rollDefaultAction(id, type) {
+  const row  = document.querySelector(`.action-row[data-id='${id}']`);
+  if (!row) return;
+  const name = row.querySelector('.action-name-text').textContent;
+  const expr = type === 'atk' ? row.dataset.atk : row.dataset.dmg;
+  if (!expr) return;
+  const { total, firstRoll } = parseDiceExpr(expr);
+  showToast(firstRoll ?? total, total, `${name} — ${type === 'atk' ? 'Attack' : 'Damage'}`);
+}
+
+// Render an editable custom action row
+function addCustomAction(data = {}) {
+  const id  = ++actionIdCounter;
+  const row = document.createElement('div');
+  row.className  = 'action-row';
+  row.dataset.id = id;
+  row.innerHTML = `
+    <div class="action-main">
+      <div class="action-header">
+        <input class="action-name" type="text" placeholder="Action name" value="${data.name||''}" oninput="saveCustomActions()">
+        <button class="action-rm" onclick="removeCustomAction(${id})">✕</button>
+      </div>
+      <textarea class="action-notes" placeholder="Notes..." oninput="saveCustomActions();autoResize(this)">${data.notes||''}</textarea>
+    </div>
+    <div class="action-rolls">
+      <div class="action-roll-wrap">
+        <span class="action-roll-label">Atk</span>
+        <input class="action-roll-input" type="text" placeholder="d20+STR" value="${data.atk||''}" oninput="saveCustomActions()">
+        <button class="action-roll-btn" onclick="rollCustomAction(${id},'atk')">Roll</button>
+      </div>
+      <div class="action-roll-wrap">
+        <span class="action-roll-label">Dmg</span>
+        <input class="action-roll-input" type="text" placeholder="1d6+2" value="${data.dmg||''}" oninput="saveCustomActions()">
+        <button class="action-roll-btn" onclick="rollCustomAction(${id},'dmg')">Roll</button>
+      </div>
+    </div>`;
+  document.getElementById('actionsList').appendChild(row);
+}
+
+function removeCustomAction(id) {
+  const el = document.querySelector(`.action-row[data-id='${id}']`);
+  if (el) { el.remove(); saveCustomActions(); }
+}
+
+function rollCustomAction(id, type) {
+  const row  = document.querySelector(`.action-row[data-id='${id}']`);
+  if (!row) return;
+  const name   = row.querySelector('.action-name').value || 'Action';
+  const inputs = row.querySelectorAll('.action-roll-input');
+  const expr   = type === 'atk' ? inputs[0].value : inputs[1].value;
+  if (!expr.trim()) return;
+  const { total, firstRoll } = parseDiceExpr(expr);
+  showToast(firstRoll ?? total, total, `${name} — ${type === 'atk' ? 'Attack' : 'Damage'}`);
+}
+
+// Keep old rollAction alias so nothing breaks
+function rollAction(id, type) { rollCustomAction(id, type); }
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function saveCustomActions() {
+  const rows = document.querySelectorAll('#actionsList .action-row');
+  const data = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('.action-roll-input');
+    data.push({
+      name:  row.querySelector('.action-name')?.value || '',
+      notes: row.querySelector('.action-notes')?.value || '',
+      atk:   inputs[0]?.value || '',
+      dmg:   inputs[1]?.value || '',
+    });
+  });
+  try { localStorage.setItem(SAVE_KEY + '_custom_actions', JSON.stringify(data)); } catch(e) {}
+}
+
+// Keep old saveActions alias
+function saveActions() { saveCustomActions(); }
+
+function loadActions() {
+  // Always render hardcoded defaults fresh — never from storage
+  // (defaults defined in defaultActions())
+  defaultActions();
+  // Load custom actions from storage
+  let data;
+  try { data = JSON.parse(localStorage.getItem(SAVE_KEY + '_custom_actions')); } catch(e) {}
+  if (data && data.length) data.forEach(d => addCustomAction(d));
+}
+
+function defaultActions() {
+  // Roll actions first, no-roll actions below — edit to change defaults
+  const DEFAULTS = [
+    {
+        "name": "Unarmed Strike",
+        "atk": "d20+STR",
+        "dmg": "1+STR",
+        "flavor": "Sometimes the best weapon is the one at the end of your arm.",
+        "notes": "Punch, kick, headbutt \u2014 whatever you've got."
+    },
+    {
+        "name": "Grapple",
+        "atk": "d20+STR",
+        "dmg": "",
+        "flavor": "Close enough to feel their heartbeat. Close enough to stop it.",
+        "notes": "Contest: STR vs target Athletics or Acrobatics. Success: target is Grappled (speed 0)."
+    },
+    {
+        "name": "Shove",
+        "atk": "d20+STR",
+        "dmg": "",
+        "flavor": "Gravity is free damage.",
+        "notes": "Contest: STR vs target Athletics or Acrobatics. Success: push 5ft away or knock prone."
+    },
+    {
+        "name": "Hide",
+        "atk": "d20+DEF",
+        "dmg": "",
+        "flavor": "The most dangerous thing in the room is what you can't see.",
+        "notes": "DEF (Evasion) vs passive Perception. Success: you become hidden."
+    },
+    {
+        "name": "Dodge",
+        "atk": "",
+        "dmg": "",
+        "flavor": "The best hit is the one that doesn't land.",
+        "notes": "Until next turn: attacks against you have disadvantage, DEX saves have advantage."
+    },
+    {
+        "name": "Dash",
+        "atk": "",
+        "dmg": "",
+        "flavor": "Sometimes valor looks a lot like running.",
+        "notes": "Double your movement speed this turn."
+    },
+    {
+        "name": "Disengage",
+        "atk": "",
+        "dmg": "",
+        "flavor": "A clean exit is a skill in itself.",
+        "notes": "Your movement doesn't provoke opportunity attacks this turn."
+    },
+    {
+        "name": "Help",
+        "atk": "",
+        "dmg": "",
+        "flavor": "One set of hands is never enough.",
+        "notes": "Give an ally advantage on their next ability check or attack roll against a target you can reach."
+    }
+];
+  DEFAULTS.forEach(d => renderDefaultAction(d));
+}
+
+
+// ── DEATH SAVES ──
+setInterval(function() {
+  var hp  = document.getElementById('currentHp').value;
+  var box = document.getElementById('deathSaves');
+  if (!box) return;
+  if (hp === '0') { box.classList.add('on'); }
+  else            { box.classList.remove('on'); }
+}, 500);
+
+function dsPip(el) { el.classList.toggle('on'); dsSave(); dsCheck(); }
+
+function dsRoll() {
+  var d = rollD20();
+  if (d === 20) { document.getElementById('currentHp').value = 1; dsClear(); showToast(20,20,'Nat 20 — Back on your feet!'); return; }
+  if (d === 1)      { dsFill('f',2); showToast(1, d,'Nat 1 — Two failures!'); }
+  else if (d >= 10) { dsFill('s',1); showToast(d, d,'Death Save — Success'); }
+  else              { dsFill('f',1); showToast(d, d,'Death Save — Failure'); }
+  dsSave(); dsCheck();
+}
+
+function dsFill(type, count) {
+  var pips = document.querySelectorAll('.ds-pip.'+type+':not(.on)');
+  for (var i=0; i<Math.min(count,pips.length); i++) pips[i].classList.add('on');
+}
+function dsClear() { document.querySelectorAll('.ds-pip').forEach(function(p){p.classList.remove('on');}); dsSave(); }
+function dsCheck() {
+  if (document.querySelectorAll('.ds-pip.s.on').length >= 3) showToast(20,20,'Stabilized!');
+  if (document.querySelectorAll('.ds-pip.f.on').length >= 3) showToast(1,1,'You have died.');
+}
+function dsSave() {
+  var s=[0,1,2].map(function(i){return document.getElementById('ds-s-'+i)?.classList.contains('on')?1:0;});
+  var f=[0,1,2].map(function(i){return document.getElementById('ds-f-'+i)?.classList.contains('on')?1:0;});
+  try{localStorage.setItem(SAVE_KEY+'_ds',JSON.stringify({s:s,f:f}));}catch(e){}
+}
+function dsLoad() {
+  var data; try{data=JSON.parse(localStorage.getItem(SAVE_KEY+'_ds'));}catch(e){}
+  if(!data)return;
+  [0,1,2].forEach(function(i){
+    if(data.s[i])document.getElementById('ds-s-'+i)?.classList.add('on');
+    if(data.f[i])document.getElementById('ds-f-'+i)?.classList.add('on');
+  });
+}
+
+
+
+load();
+loadNoteDocs();
+loadActions();
+dsLoad();
+refreshZeroHidden();
+
+// auto-save + re-hide on any locked-field change
+document.querySelectorAll('.locked-field').forEach(el => {
+  el.addEventListener('change', save);
+  el.addEventListener('input',  save);
+});
+
+// re-hide whenever any prof input changes
+document.querySelectorAll('.prof-val').forEach(el => {
+  el.addEventListener('input', () => { refreshZeroHidden(); save(); });
+});
+// ── SLOAN — PURPLE MIST ANIMATION ──
+(function() {
+  const canvas = document.getElementById('mistCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Mist layers — slow drifting blobs
+  const layers = Array.from({length: 7}, (_, i) => ({
+    x:     Math.random() * 1920,
+    y:     H * (0.2 + Math.random() * 0.7),
+    rx:    150 + Math.random() * 280,
+    ry:    60  + Math.random() * 120,
+    vx:    (Math.random() - 0.5) * 0.18,
+    vy:    (Math.random() - 0.5) * 0.06,
+    phase: Math.random() * Math.PI * 2,
+    alpha: 0.04 + Math.random() * 0.07,
+    col:   i < 4 ? '100,60,180' : '60,30,120',
+  }));
+
+  // Floating soul particles — very faint, drift upward
+  const particles = Array.from({length: 35}, () => ({
+    x:     Math.random() * 1920,
+    y:     Math.random() * 1080,
+    size:  0.8 + Math.random() * 2.2,
+    vx:    (Math.random() - 0.5) * 0.15,
+    vy:    -(0.08 + Math.random() * 0.2),
+    phase: Math.random() * Math.PI * 2,
+    alpha: 0.08 + Math.random() * 0.18,
+  }));
+
+  let t = 0;
+  function frame() {
+    ctx.clearRect(0,0,W,H);
+    t += 0.004;
+
+    // Background deep purple vignette
+    const bg = ctx.createRadialGradient(W*0.5, H*0.5, 0, W*0.5, H*0.5, Math.max(W,H)*0.75);
+    bg.addColorStop(0,   'rgba(20,10,40,0.35)');
+    bg.addColorStop(0.5, 'rgba(10,5,20,0.2)');
+    bg.addColorStop(1,   'rgba(0,0,0,0.45)');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0,0,W,H);
+
+    // Mist blobs
+    layers.forEach(l => {
+      l.x += l.vx + Math.sin(t * 0.3 + l.phase) * 0.08;
+      l.y += l.vy + Math.cos(t * 0.2 + l.phase) * 0.04;
+      if (l.x < -l.rx*1.5) l.x = W + l.rx;
+      if (l.x > W + l.rx*1.5) l.x = -l.rx;
+      if (l.y < -l.ry*2) l.y = H + l.ry;
+      if (l.y > H + l.ry*2) l.y = -l.ry;
+
+      const pulse = 0.85 + 0.15 * Math.sin(t * 0.5 + l.phase);
+      ctx.save();
+      ctx.scale(1, l.ry / l.rx);
+      const g = ctx.createRadialGradient(l.x, l.y * (l.rx/l.ry), 0, l.x, l.y * (l.rx/l.ry), l.rx * pulse);
+      g.addColorStop(0,   `rgba(${l.col},${l.alpha})`);
+      g.addColorStop(0.5, `rgba(${l.col},${l.alpha * 0.5})`);
+      g.addColorStop(1,   'transparent');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(l.x, l.y * (l.rx/l.ry), l.rx * pulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    });
+
+    // Soul particles — tiny drifting lights
+    particles.forEach(p => {
+      p.x  += p.vx + Math.sin(t * 0.8 + p.phase) * 0.1;
+      p.y  += p.vy;
+      if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+      if (p.x < -10) p.x = W + 10;
+      if (p.x > W+10) p.x = -10;
+
+      const pulse = 0.6 + 0.4 * Math.sin(t * 1.5 + p.phase);
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size * 3);
+      g.addColorStop(0,   `rgba(196,154,232,${p.alpha * pulse})`);
+      g.addColorStop(0.5, `rgba(155,109,218,${p.alpha * pulse * 0.4})`);
+      g.addColorStop(1,   'transparent');
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+
 </script>
+
+<div id="toastStack"></div>
+
+<button id="diceBtn" onclick="toggleDicePanel()" title="Dice Roller">⬡</button>
+
+<div id="dicePanel">
+  <div class="dice-grid">
+    <div class="dice-die" id="die-d20"  onclick="selectDie('d20',20)">d20<span class="dice-die-count" id="cnt-d20"></span></div>
+    <div class="dice-die" id="die-d12"  onclick="selectDie('d12',12)">d12<span class="dice-die-count" id="cnt-d12"></span></div>
+    <div class="dice-die" id="die-d10"  onclick="selectDie('d10',10)">d10<span class="dice-die-count" id="cnt-d10"></span></div>
+    <div class="dice-die" id="die-d8"   onclick="selectDie('d8',8)">d8<span class="dice-die-count" id="cnt-d8"></span></div>
+    <div class="dice-die" id="die-d6"   onclick="selectDie('d6',6)">d6<span class="dice-die-count" id="cnt-d6"></span></div>
+    <div class="dice-die" id="die-d4"   onclick="selectDie('d4',4)">d4<span class="dice-die-count" id="cnt-d4"></span></div>
+    <div class="dice-die" id="die-d100" onclick="selectDie('d100',100)">d100<span class="dice-die-count" id="cnt-d100"></span></div>
+  </div>
+  <div class="dice-actions">
+    <button class="dice-reset-btn" onclick="resetDice()">Reset</button>
+    <button class="dice-roll-btn" onclick="rollDice()">Roll</button>
+  </div>
+</div>
 </body>
 </html>
