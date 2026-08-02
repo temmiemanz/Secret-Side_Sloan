@@ -837,6 +837,27 @@ body { background: #0a0810; min-height: 100vh; }
 .hw-rules li { font-size:12px;color:var(--dim);line-height:1.65; }
 .hw-em { color:var(--accent);font-weight:600;text-shadow:0 0 5px rgba(155,109,218,0.25); }
 
+
+/* REST BUTTONS */
+.rest-row {
+  display: flex; gap: 6px; align-items: center;
+}
+.rest-btn {
+  font-size: 9px; font-weight: 700; letter-spacing: 0.14em;
+  text-transform: uppercase; padding: 4px 10px;
+  border: 1px solid var(--border2); background: none;
+  color: var(--muted); border-radius: var(--radius);
+  cursor: pointer; transition: all var(--transition);
+  font-family: var(--font-display, var(--font-main));
+  white-space: nowrap;
+}
+.rest-btn.short:hover { border-color: var(--accent); color: var(--accent); }
+.rest-btn.long:hover  { border-color: var(--green);  color: var(--green); }
+
+
+.rest-toast { display: flex; flex-direction: column; gap: 2px; }
+.rest-toast-detail { font-size: 11px; color: var(--dim); }
+
 </style>
 </head>
 <body>
@@ -845,6 +866,11 @@ body { background: #0a0810; min-height: 100vh; }
 
 <div class="page">
 
+  <div class="rest-row">
+    <button class="rest-btn short" onclick="doShortRest()">Short Rest</button>
+    <button class="rest-btn long"  onclick="doLongRest()">Long Rest</button>
+  </div>
+
   <!-- WARNING -->
   <div style="text-align:center;font-size:10px;color:var(--muted);letter-spacing:0.04em;padding:2px 0 4px;">
     Please try to roll with a real dice, these online rolls are untrustworthy and are a last resort!
@@ -852,7 +878,7 @@ body { background: #0a0810; min-height: 100vh; }
 
   <!-- EDIT BAR -->
   <div class="edit-bar">
-    <button class="edit-btn" id="editBtn" onclick="toggleEdit()">Edit</button>
+    
   </div>
 
   <!-- HEADER -->
@@ -2120,6 +2146,40 @@ document.querySelectorAll('.prof-val').forEach(el => {
   }
   frame();
 })();
+
+
+// ── REST TOAST — plain notification, no roll display ──
+function showRestToast(title, detail) {
+  const stack = document.getElementById('toastStack');
+  if (!stack) return;
+  const el = document.createElement('div');
+  el.className = 'toast-item rest-toast';
+  el.innerHTML = '<span class="toast-label">' + title + '</span>' +
+                 (detail ? '<span class="rest-toast-detail">' + detail + '</span>' : '');
+  stack.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, 3000);
+}
+
+// ── REST SYSTEM ──
+function doShortRest() {
+  const hpEl  = document.getElementById('currentHp');
+  const maxEl = document.getElementById('maxHp');
+  if (!hpEl || !maxEl) return;
+  const cur    = parseInt(hpEl.value) || 0;
+  const max    = parseInt(maxEl.value) || cur;
+  const gained = Math.min(cur, max - cur);
+  hpEl.value   = Math.min(max, cur + gained);
+  save();
+  showRestToast('Short Rest', gained > 0 ? 'HP +' + gained : 'HP unchanged');
+}
+
+function doLongRest() {
+  const hpEl  = document.getElementById('currentHp');
+  const maxEl = document.getElementById('maxHp');
+  if (hpEl && maxEl) { hpEl.value = maxEl.value; save(); }
+  dsClear();
+  showRestToast('Long Rest', 'Fully restored');
+}
 
 </script>
 
