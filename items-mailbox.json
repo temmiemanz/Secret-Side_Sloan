@@ -1,56 +1,18 @@
 {
   "items": [
     {
-      "mailId": "m17902674283061870",
-      "name": "Splinter",
-      "type": "Weapon",
-      "rarity": "Rare",
-      "value": "",
-      "weight": "0",
-      "qty": 1,
-      "stackable": false,
+      "mailId": "starter-splinter",
+      "name": "Splinter", "type": "Weapon", "rarity": "Rare",
+      "value": "", "weight": "0", "qty": 1, "stackable": false,
       "desc": "A blade the color of a bruise, thin as broken glass and just as sharp along the edge. It doesn't weigh anything, not because it's small, but because it was never really here to begin with.\n\nShe doesn't remember making it. It's just always been there when she reached for it, waiting in whatever pocket of nothing she keeps it in. Only her hand can close around it. Anyone else's fingers just pass right through.",
-      "notes": "",
-      "equippable": true,
-      "usable": false,
-      "consumable": false,
-      "uses": "",
-      "props": "Finesse, Weightless, Linked",
-      "weaponWt": "",
-      "twoHanded": false,
-      "ac": "",
-      "armorType": "Light",
-      "strReq": "",
-      "stealthDisadv": false,
-      "ammoDamage": "",
-      "ammoDmgType": "",
-      "effect": "",
-      "fx": {
-        "str": "",
-        "mnd": "",
-        "sol": "",
-        "def": ""
-      },
-      "conditions": [],
-      "customFields": [],
+      "notes": "", "props": "Finesse, Weightless, Linked", "weaponWt": "", "twoHanded": false, "equippable": true, "usable": false, "consumable": false,
+      "ac": "", "armorType": "Light", "strReq": "", "stealthDisadv": false,
+      "ammoDamage": "", "ammoDmgType": "", "effect": "", "uses": "",
+      "fx": {"str":"", "mnd":"", "sol":"", "def":""}, "conditions": [], "customFields": [],
       "actions": [
-        {
-          "name": "Strike",
-          "damage": "1d6",
-          "dmgType": "Slashing",
-          "range": "5 ft",
-          "damage2": "2",
-          "dmgType2": "",
-          "notes": "Strike the target with a basic attack"
-        }
+        { "name":"Strike", "damage":"1d6", "dmgType":"Slashing", "range":"5 ft", "damage2":"2", "dmgType2":"", "notes":"Strike the target with a basic attack" }
       ]
     }
   ],
-  "commands": [
-    {
-      "cmdId": "c17902688453436592",
-      "type": "removeItem",
-      "itemName": "Piercing Resonance"
-    }
-  ]
+  "commands": []
 }
