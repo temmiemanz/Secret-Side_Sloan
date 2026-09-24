@@ -46,5 +46,11 @@
       ]
     }
   ],
-  "commands": []
+  "commands": [
+    {
+      "cmdId": "c17902688453436592",
+      "type": "removeItem",
+      "itemName": "Piercing Resonance"
+    }
+  ]
 }
