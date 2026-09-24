@@ -1924,6 +1924,7 @@ function updateStat(stat) {
   if (modEl)  modEl.textContent  = sign + mod;
   var skills = STAT_SKILLS[stat] || [];
   skills.forEach(function(sk) { updateBadge(sk, stat); });
+  if (stat === 'str' && typeof invAutoWeightMax === 'function') invAutoWeightMax();
 }
 function updateBadge(skill, stat) {
   var profEl  = document.getElementById(skill+'-prof');
@@ -2490,6 +2491,7 @@ function invLoad() {
   if (!invEquipped.otherIds) invEquipped.otherIds = [];
   var wm = localStorage.getItem(INV_KEY+'_wmax');
   if (wm) { var el = document.getElementById('invWeightMax'); if(el) el.value = wm; }
+  else { invAutoWeightMax(); }
   if (DM_MODE) { var ab = document.getElementById('invAddBtn'); if(ab) ab.style.display='none'; }
   invRender(); invApplyPassives();
 }
@@ -2534,10 +2536,20 @@ function invApplyWeaponTemplate(name) {
   var sel = document.getElementById('ipWeaponTemplate');
   if (sel) sel.value = '';
 }
+function invAutoWeightMax() {
+  // Carry capacity scales with STR so weight is only ever a real constraint
+  // for someone hoarding well beyond a normal loadout, never for just
+  // carrying a weapon, armor, and some supplies. Still freely editable by
+  // hand — this just sets a fair starting point whenever STR changes.
+  var strEl = document.getElementById('strVal');
+  var str = strEl ? (parseInt(strEl.value) || 10) : 10;
+  var computed = Math.max(35, str * 10);
+  var el = document.getElementById('invWeightMax');
+  if (el) el.value = computed;
+  invUpdateWeight();
+}
 function invUpdateWeight() {
-  // Unequipped weapons are weightless — only carried weight when actively equipped.
   var total = invItems.reduce(function(s,i){
-    if (i.type === 'Weapon' && !invIsEquipped(i)) return s;
     return s+(parseFloat(i.weight)||0)*(parseInt(i.qty)||1);
   },0);
   var max   = parseFloat((document.getElementById('invWeightMax')||{value:35}).value) || 35;
