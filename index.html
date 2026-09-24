@@ -19,8 +19,8 @@
   --border2:      #2a2240;
   --accent:       #9b6dda;
   --text:         #d4cce8;
-  --muted:        #3d3458;
-  --dim:          #7a6e9a;
+  --muted:        #8676b5;
+  --dim:          #9e95b9;
   --input:        #08060f;
   --red:          #b84060;
   --green:        #4a8a7a;
@@ -1813,41 +1813,71 @@ var STAT_SKILLS  = {str:['ath','itm','sur'],mnd:['per','inv','foc'],sol:['com','
 
 // Basic weapon templates — quick-fill starting points, all freely editable after loading.
 var WEAPON_TEMPLATES = {
-  "Dagger":            { dmg:"1d4",  type:"Piercing",    range:"20/60 ft",   props:"Finesse, Light, Thrown",         wclass:"Light",  weight:1    },
-  "Shortsword":        { dmg:"1d6",  type:"Piercing",    range:"5 ft",       props:"Finesse, Light",                 wclass:"Light",  weight:2    },
-  "Rapier":            { dmg:"1d8",  type:"Piercing",    range:"5 ft",       props:"Finesse",                        wclass:"Medium", weight:2    },
-  "Scimitar":          { dmg:"1d6",  type:"Slashing",    range:"5 ft",       props:"Finesse, Light",                 wclass:"Light",  weight:3    },
-  "Longsword":         { dmg:"1d8",  type:"Slashing",    range:"5 ft",       props:"Versatile (1d10)",               wclass:"Medium", weight:3    },
-  "Greatsword":        { dmg:"2d6",  type:"Slashing",    range:"5 ft",       props:"Heavy, Two-Handed",              wclass:"Heavy",  weight:6    },
-  "Battleaxe":         { dmg:"1d8",  type:"Slashing",    range:"5 ft",       props:"Versatile (1d10)",               wclass:"Medium", weight:4    },
-  "Greataxe":          { dmg:"1d12", type:"Slashing",    range:"5 ft",       props:"Heavy, Two-Handed",              wclass:"Heavy",  weight:7    },
-  "Handaxe":           { dmg:"1d6",  type:"Slashing",    range:"20/60 ft",   props:"Light, Thrown",                  wclass:"Light",  weight:2    },
-  "Warhammer":         { dmg:"1d8",  type:"Bludgeoning", range:"5 ft",       props:"Versatile (1d10)",               wclass:"Medium", weight:2    },
-  "Maul":              { dmg:"2d6",  type:"Bludgeoning", range:"5 ft",       props:"Heavy, Two-Handed",              wclass:"Heavy",  weight:10   },
-  "Mace":              { dmg:"1d6",  type:"Bludgeoning", range:"5 ft",       props:"",                                wclass:"Medium", weight:4    },
-  "Club":              { dmg:"1d4",  type:"Bludgeoning", range:"5 ft",       props:"Light",                          wclass:"Light",  weight:2    },
-  "Greatclub":         { dmg:"1d8",  type:"Bludgeoning", range:"5 ft",       props:"Two-Handed",                     wclass:"Heavy",  weight:10   },
-  "Quarterstaff":      { dmg:"1d6",  type:"Bludgeoning", range:"5 ft",       props:"Versatile (1d8)",                wclass:"Medium", weight:4    },
-  "Spear":             { dmg:"1d6",  type:"Piercing",    range:"20/60 ft",   props:"Thrown, Versatile (1d8)",        wclass:"Medium", weight:3    },
-  "Trident":           { dmg:"1d6",  type:"Piercing",    range:"20/60 ft",   props:"Thrown, Versatile (1d8)",        wclass:"Medium", weight:4    },
-  "Pike":              { dmg:"1d10", type:"Piercing",    range:"5 ft",       props:"Heavy, Reach, Two-Handed",       wclass:"Heavy",  weight:18   },
-  "Halberd":           { dmg:"1d10", type:"Slashing",    range:"5 ft",       props:"Heavy, Reach, Two-Handed",       wclass:"Heavy",  weight:6    },
-  "Glaive":            { dmg:"1d10", type:"Slashing",    range:"5 ft",       props:"Heavy, Reach, Two-Handed",       wclass:"Heavy",  weight:6    },
-  "Flail":             { dmg:"1d8",  type:"Bludgeoning", range:"5 ft",       props:"",                                wclass:"Medium", weight:2    },
-  "Morningstar":       { dmg:"1d8",  type:"Piercing",    range:"5 ft",       props:"",                                wclass:"Medium", weight:4    },
-  "War Pick":          { dmg:"1d8",  type:"Piercing",    range:"5 ft",       props:"Versatile (1d10)",               wclass:"Medium", weight:2    },
-  "Sickle":            { dmg:"1d4",  type:"Slashing",    range:"5 ft",       props:"Light",                          wclass:"Light",  weight:2    },
-  "Whip":              { dmg:"1d4",  type:"Slashing",    range:"10 ft",      props:"Finesse, Reach",                 wclass:"Medium", weight:3    },
-  "Dart":              { dmg:"1d4",  type:"Piercing",    range:"20/60 ft",   props:"Finesse, Thrown",                wclass:"Light",  weight:0.25 },
-  "Javelin":           { dmg:"1d6",  type:"Piercing",    range:"30/120 ft",  props:"Thrown",                         wclass:"Medium", weight:2    },
-  "Sling":             { dmg:"1d4",  type:"Bludgeoning", range:"30/120 ft",  props:"Ammunition",                     wclass:"Ranged", weight:0    },
-  "Shortbow":          { dmg:"1d6",  type:"Piercing",    range:"80/320 ft",  props:"Ammunition, Two-Handed",         wclass:"Ranged", weight:2    },
-  "Longbow":           { dmg:"1d8",  type:"Piercing",    range:"150/600 ft", props:"Ammunition, Heavy, Two-Handed",  wclass:"Ranged", weight:2    },
-  "Light Crossbow":    { dmg:"1d8",  type:"Piercing",    range:"80/320 ft",  props:"Ammunition, Loading, Two-Handed",wclass:"Ranged", weight:5    },
-  "Heavy Crossbow":    { dmg:"1d10", type:"Piercing",    range:"100/400 ft",props:"Ammunition, Heavy, Loading, Two-Handed", wclass:"Ranged", weight:18 },
-  "Hand Crossbow":     { dmg:"1d6",  type:"Piercing",    range:"30/120 ft",  props:"Ammunition, Light, Loading",     wclass:"Ranged", weight:3    },
-  "Net":               { dmg:"",     type:"",            range:"5/15 ft",    props:"Special, Thrown",                wclass:"Ranged", weight:3    },
-  "Unarmed Strike":    { dmg:"1",    type:"Bludgeoning", range:"5 ft",       props:"",                                wclass:"Light",  weight:0    }
+  "Dagger":            { tier:"Basic", dmg:"1d4",  type:"Piercing",    range:"20/60 ft",   props:"Finesse, Light, Thrown",         wclass:"Light",  weight:1    },
+  "Shortsword":        { tier:"Basic", dmg:"1d6",  type:"Piercing",    range:"5 ft",       props:"Finesse, Light",                 wclass:"Light",  weight:2    },
+  "Rapier":            { tier:"Basic", dmg:"1d8",  type:"Piercing",    range:"5 ft",       props:"Finesse",                        wclass:"Medium", weight:2    },
+  "Scimitar":          { tier:"Basic", dmg:"1d6",  type:"Slashing",    range:"5 ft",       props:"Finesse, Light",                 wclass:"Light",  weight:3    },
+  "Longsword":         { tier:"Basic", dmg:"1d8",  type:"Slashing",    range:"5 ft",       props:"Versatile (1d10)",               wclass:"Medium", weight:3    },
+  "Greatsword":        { tier:"Basic", dmg:"2d6",  type:"Slashing",    range:"5 ft",       props:"Heavy, Two-Handed",              wclass:"Heavy",  weight:6    },
+  "Battleaxe":         { tier:"Basic", dmg:"1d8",  type:"Slashing",    range:"5 ft",       props:"Versatile (1d10)",               wclass:"Medium", weight:4    },
+  "Greataxe":          { tier:"Basic", dmg:"1d12", type:"Slashing",    range:"5 ft",       props:"Heavy, Two-Handed",              wclass:"Heavy",  weight:7    },
+  "Handaxe":           { tier:"Basic", dmg:"1d6",  type:"Slashing",    range:"20/60 ft",   props:"Light, Thrown",                  wclass:"Light",  weight:2    },
+  "Warhammer":         { tier:"Basic", dmg:"1d8",  type:"Bludgeoning", range:"5 ft",       props:"Versatile (1d10)",               wclass:"Medium", weight:2    },
+  "Maul":              { tier:"Basic", dmg:"2d6",  type:"Bludgeoning", range:"5 ft",       props:"Heavy, Two-Handed",              wclass:"Heavy",  weight:10   },
+  "Mace":              { tier:"Basic", dmg:"1d6",  type:"Bludgeoning", range:"5 ft",       props:"",                                wclass:"Medium", weight:4    },
+  "Club":              { tier:"Basic", dmg:"1d4",  type:"Bludgeoning", range:"5 ft",       props:"Light",                          wclass:"Light",  weight:2    },
+  "Greatclub":         { tier:"Basic", dmg:"1d8",  type:"Bludgeoning", range:"5 ft",       props:"Two-Handed",                     wclass:"Heavy",  weight:10   },
+  "Quarterstaff":      { tier:"Basic", dmg:"1d6",  type:"Bludgeoning", range:"5 ft",       props:"Versatile (1d8)",                wclass:"Medium", weight:4    },
+  "Spear":             { tier:"Basic", dmg:"1d6",  type:"Piercing",    range:"20/60 ft",   props:"Thrown, Versatile (1d8)",        wclass:"Medium", weight:3    },
+  "Trident":           { tier:"Basic", dmg:"1d6",  type:"Piercing",    range:"20/60 ft",   props:"Thrown, Versatile (1d8)",        wclass:"Medium", weight:4    },
+  "Pike":              { tier:"Basic", dmg:"1d10", type:"Piercing",    range:"5 ft",       props:"Heavy, Reach, Two-Handed",       wclass:"Heavy",  weight:18   },
+  "Halberd":           { tier:"Basic", dmg:"1d10", type:"Slashing",    range:"5 ft",       props:"Heavy, Reach, Two-Handed",       wclass:"Heavy",  weight:6    },
+  "Glaive":            { tier:"Basic", dmg:"1d10", type:"Slashing",    range:"5 ft",       props:"Heavy, Reach, Two-Handed",       wclass:"Heavy",  weight:6    },
+  "Flail":             { tier:"Basic", dmg:"1d8",  type:"Bludgeoning", range:"5 ft",       props:"",                                wclass:"Medium", weight:2    },
+  "Morningstar":       { tier:"Basic", dmg:"1d8",  type:"Piercing",    range:"5 ft",       props:"",                                wclass:"Medium", weight:4    },
+  "War Pick":          { tier:"Basic", dmg:"1d8",  type:"Piercing",    range:"5 ft",       props:"Versatile (1d10)",               wclass:"Medium", weight:2    },
+  "Sickle":            { tier:"Basic", dmg:"1d4",  type:"Slashing",    range:"5 ft",       props:"Light",                          wclass:"Light",  weight:2    },
+  "Whip":              { tier:"Basic", dmg:"1d4",  type:"Slashing",    range:"10 ft",      props:"Finesse, Reach",                 wclass:"Medium", weight:3    },
+  "Dart":              { tier:"Basic", dmg:"1d4",  type:"Piercing",    range:"20/60 ft",   props:"Finesse, Thrown",                wclass:"Light",  weight:0.25 },
+  "Javelin":           { tier:"Basic", dmg:"1d6",  type:"Piercing",    range:"30/120 ft",  props:"Thrown",                         wclass:"Medium", weight:2    },
+  "Sling":             { tier:"Basic", dmg:"1d4",  type:"Bludgeoning", range:"30/120 ft",  props:"Ammunition",                     wclass:"Ranged", weight:0    },
+  "Shortbow":          { tier:"Basic", dmg:"1d6",  type:"Piercing",    range:"80/320 ft",  props:"Ammunition, Two-Handed",         wclass:"Ranged", weight:2    },
+  "Longbow":           { tier:"Basic", dmg:"1d8",  type:"Piercing",    range:"150/600 ft", props:"Ammunition, Heavy, Two-Handed",  wclass:"Ranged", weight:2    },
+  "Light Crossbow":    { tier:"Basic", dmg:"1d8",  type:"Piercing",    range:"80/320 ft",  props:"Ammunition, Loading, Two-Handed",wclass:"Ranged", weight:5    },
+  "Heavy Crossbow":    { tier:"Basic", dmg:"1d10", type:"Piercing",    range:"100/400 ft",props:"Ammunition, Heavy, Loading, Two-Handed", wclass:"Ranged", weight:18 },
+  "Hand Crossbow":     { tier:"Basic", dmg:"1d6",  type:"Piercing",    range:"30/120 ft",  props:"Ammunition, Light, Loading",     wclass:"Ranged", weight:3    },
+  "Net":               { tier:"Basic", dmg:"",     type:"",            range:"5/15 ft",    props:"Special, Thrown",                wclass:"Ranged", weight:3    },
+  "Unarmed Strike":    { tier:"Basic", dmg:"1",    type:"Bludgeoning", range:"5 ft",       props:"",                                wclass:"Light",  weight:0    },
+
+  "Combat Knife":      { tier:"Advanced", dmg:"1d6",  type:"Slashing",    range:"5 ft",       props:"Finesse, Light",              wclass:"Light",  weight:1  },
+  "Machete":           { tier:"Advanced", dmg:"1d6",  type:"Slashing",    range:"5 ft",       props:"Light",                       wclass:"Light",  weight:2  },
+  "Crowbar":           { tier:"Advanced", dmg:"1d6",  type:"Bludgeoning", range:"5 ft",       props:"",                             wclass:"Medium", weight:5  },
+  "Baseball Bat":      { tier:"Advanced", dmg:"1d6",  type:"Bludgeoning", range:"5 ft",       props:"",                             wclass:"Medium", weight:3  },
+  "Fire Axe":          { tier:"Advanced", dmg:"1d8",  type:"Slashing",    range:"5 ft",       props:"Versatile (1d10)",             wclass:"Medium", weight:5  },
+  "Pistol (9mm)":      { tier:"Advanced", dmg:"1d8",  type:"Piercing",    range:"40/120 ft",  props:"Ammunition, Light",            wclass:"Light",   weight:2  },
+  "Revolver":          { tier:"Advanced", dmg:"1d10", type:"Piercing",    range:"40/120 ft",  props:"Ammunition, Light",            wclass:"Light",   weight:3  },
+  "Hunting Rifle":     { tier:"Advanced", dmg:"1d10", type:"Piercing",    range:"200/600 ft", props:"Ammunition, Two-Handed",       wclass:"Ranged",  weight:8  },
+  "Sniper Rifle":      { tier:"Advanced", dmg:"2d8",  type:"Piercing",    range:"300/900 ft", props:"Ammunition, Heavy, Two-Handed",wclass:"Ranged",  weight:10 },
+  "Submachine Gun":    { tier:"Advanced", dmg:"1d8",  type:"Piercing",    range:"60/180 ft",  props:"Ammunition, Automatic, Two-Handed", wclass:"Ranged", weight:6 },
+  "Assault Rifle":     { tier:"Advanced", dmg:"1d10", type:"Piercing",    range:"100/300 ft", props:"Ammunition, Automatic, Two-Handed", wclass:"Ranged", weight:8 },
+  "Battle Rifle":      { tier:"Advanced", dmg:"1d12", type:"Piercing",    range:"150/450 ft", props:"Ammunition, Two-Handed",       wclass:"Ranged",  weight:9  },
+  "Combat Shotgun":    { tier:"Advanced", dmg:"2d6",  type:"Piercing",    range:"20/60 ft",   props:"Ammunition, Two-Handed",       wclass:"Ranged",  weight:7  },
+  "Light Machine Gun": { tier:"Advanced", dmg:"2d8",  type:"Piercing",    range:"150/450 ft", props:"Ammunition, Automatic, Heavy, Two-Handed", wclass:"Ranged", weight:15 },
+  "Frag Grenade":      { tier:"Advanced", dmg:"4d6",  type:"Solid",       range:"30/60 ft",   props:"Thrown, Special",              wclass:"Thrown",  weight:1,
+                         notes:"Explodes in a burst — everyone caught in the blast takes damage, not just the target." },
+  "Molotov Cocktail":  { tier:"Advanced", dmg:"1d4",  type:"Bludgeoning", range:"20/40 ft",   props:"Thrown, Special",              wclass:"Thrown",  weight:2,
+                         dmg2:"2d6", type2:"Fire",
+                         notes:"Shatters on impact and douses the area in flame." },
+  "Pipe Bomb":         { tier:"Advanced", dmg:"3d6",  type:"Solid",       range:"20/40 ft",   props:"Thrown, Special",              wclass:"Thrown",  weight:2,
+                         notes:"Improvised and unreliable — the DM may call for a roll to see if it actually goes off." },
+  "Flashbang":         { tier:"Advanced", dmg:"",     type:"",            range:"20/40 ft",   props:"Thrown, Special",              wclass:"Thrown",  weight:1,
+                         notes:"No damage. Blinds and deafens anyone caught in the flash." },
+  "Smoke Grenade":     { tier:"Advanced", dmg:"",     type:"",            range:"20/40 ft",   props:"Thrown, Special",              wclass:"Thrown",  weight:1,
+                         notes:"No damage. Fills the area with thick smoke, blocking sight." },
+  "C4 Charge":         { tier:"Advanced", dmg:"6d6",  type:"Solid",       range:"5 ft",       props:"Special",                      wclass:"Heavy",   weight:2,
+                         notes:"Placed, not thrown. Detonated remotely or on a timer." },
+  "Landmine":          { tier:"Advanced", dmg:"4d8",  type:"Solid",       range:"5 ft",       props:"Special",                      wclass:"Heavy",   weight:3,
+                         notes:"Placed and hidden. Triggers on pressure, not thrown or fired." }
 };
 
 var editMode        = false;
@@ -1997,18 +2027,26 @@ function load() {
   var data;
   try { data = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch(e) {}
   function set(id, val) { var el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; }
+  function setNum(id, val) {
+    // Guards against a blank/corrupted saved value silently wiping a real stat —
+    // only applies the saved number if it actually parses to one; otherwise the
+    // field keeps whatever sensible default is already baked into the HTML.
+    var el = document.getElementById(id); if (!el) return;
+    var n = parseFloat(val);
+    if (!isNaN(n)) el.value = n;
+  }
   if (!data) { ['str','mnd','sol','def'].forEach(function(s) { updateStat(s); }); return; }
   set('charName',    data.charName);
   set('playerName',  data.playerName);
   set('abilityName', data.abilityName);
-  set('currentHp',   data.currentHp);
-  set('maxHp',       data.maxHp);
-  set('levelVal',    data.level);
-  set('acVal',       data.ac);
-  set('strVal',      data.str !== undefined ? data.str : 10);
-  set('mndVal',      data.mnd !== undefined ? data.mnd : 10);
-  set('solVal',      data.sol !== undefined ? data.sol : 10);
-  set('defVal',      data.def !== undefined ? data.def : 10);
+  setNum('currentHp',   data.currentHp);
+  setNum('maxHp',       data.maxHp);
+  setNum('levelVal',    data.level);
+  setNum('acVal',       data.ac);
+  setNum('strVal',      data.str);
+  setNum('mndVal',      data.mnd);
+  setNum('solVal',      data.sol);
+  setNum('defVal',      data.def);
   set('conditionsText', data.conditions);
   if (data.lore) set('loreText', data.lore);
   var catEl = document.getElementById('powerCat');
@@ -2460,11 +2498,15 @@ function invLoadFromSave() { invLoad(); }
 function invPopulateWeaponTemplates() {
   var sel = document.getElementById('ipWeaponTemplate');
   if (!sel || sel.dataset.filled) return;
+  var basicGroup = document.createElement('optgroup'); basicGroup.label = 'Basic';
+  var advGroup   = document.createElement('optgroup'); advGroup.label = 'Advanced';
   Object.keys(WEAPON_TEMPLATES).forEach(function(name){
     var opt = document.createElement('option');
     opt.value = name; opt.textContent = name;
-    sel.appendChild(opt);
+    (WEAPON_TEMPLATES[name].tier === 'Advanced' ? advGroup : basicGroup).appendChild(opt);
   });
+  sel.appendChild(basicGroup);
+  sel.appendChild(advGroup);
   sel.dataset.filled = '1';
 }
 function invApplyWeaponTemplate(name) {
@@ -2482,9 +2524,13 @@ function invApplyWeaponTemplate(name) {
   if (wclassEl) wclassEl.value = t.wclass;
   var twoHandedEl = document.getElementById('ipTwoHanded');
   if (twoHandedEl) twoHandedEl.checked = /two-handed/i.test(t.props);
+  // Replace the actions list with a single templated attack — anything
+  // already typed there gets cleared, since loading a template means
+  // starting fresh for this weapon.
   var list = document.getElementById('ipItemActionList');
   if (list) list.innerHTML = '';
-  invAddItemActionRow({ name: name, damage: t.dmg, dmgType: t.type, range: t.range, notes: '' });
+  invAddItemActionRow({ name: name, damage: t.dmg, dmgType: t.type, range: t.range, damage2: t.dmg2||'', dmgType2: t.type2||'', notes: t.notes||'' });
+  // Reset the dropdown so it's ready to load another template if needed.
   var sel = document.getElementById('ipWeaponTemplate');
   if (sel) sel.value = '';
 }
@@ -3105,6 +3151,113 @@ function invGetItemActions() {
   return out;
 }
 
+// ── RECEIVE ITEM VIA SHARE LINK (fallback: works if the player is willing to tap it) ──
+function b64DecodeUnicode(str) {
+  return decodeURIComponent(atob(str).split('').map(function(c) {
+    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+  }).join(''));
+}
+function invCheckIncomingItem() {
+  if (!location.hash || location.hash.indexOf('#give=') !== 0) return;
+  try {
+    var item = JSON.parse(b64DecodeUnicode(decodeURIComponent(location.hash.slice(6))));
+    if (item && item.name) {
+      var ok = confirm('Add "' + item.name + '" to your inventory?');
+      if (ok) {
+        item.id = 'i' + Date.now();
+        invItems.push(item);
+        invSave(); invRender(); invApplyPassives();
+        showRestToast('Item Received', item.name);
+      }
+    }
+  } catch (e) { /* garbled or old link — ignore quietly */ }
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
+// ── RECEIVE ITEM/COMMANDS VIA MAILBOX (main path: fully automatic, no action needed) ──
+// A tiny items-mailbox.json file sits alongside this sheet in the same repo.
+// The DM can drop an item, or a stat/level/HP/AC change, or a removal request
+// into it from anywhere (phone, GitHub's own site, the DM screen tool) with
+// zero cooperation from this sheet's owner — the next time this page is open
+// or reloaded, anything new in the mailbox is applied automatically.
+// Already-applied entries are tracked so nothing repeats.
+function invApplyDMCommand(cmd) {
+  if (cmd.type === 'setStat' && ['str','mnd','sol','def'].indexOf(cmd.stat) !== -1) {
+    var el = document.getElementById(cmd.stat + 'Val');
+    if (el) { el.value = cmd.value; updateStat(cmd.stat); }
+    return 'Set ' + cmd.stat.toUpperCase() + ' to ' + cmd.value;
+  }
+  if (cmd.type === 'setLevel') {
+    var lv = document.getElementById('levelVal');
+    if (lv) lv.value = cmd.value;
+    return 'Set Level to ' + cmd.value;
+  }
+  if (cmd.type === 'setHp') {
+    var cur = document.getElementById('currentHp'), max = document.getElementById('maxHp');
+    if (cmd.current !== undefined && cur) cur.value = cmd.current;
+    if (cmd.max !== undefined && max) max.value = cmd.max;
+    if (typeof clampHp === 'function') clampHp();
+    return 'Set HP to ' + cmd.current + '/' + cmd.max;
+  }
+  if (cmd.type === 'setAC') {
+    var ac = document.getElementById('acVal');
+    if (ac) ac.value = cmd.value;
+    if (typeof updateACDisplay === 'function') updateACDisplay();
+    return 'Set AC override to ' + cmd.value;
+  }
+  if (cmd.type === 'removeItem') {
+    var target = (cmd.itemName || '').trim().toLowerCase();
+    var idx = invItems.findIndex(function(i){ return (i.name||'').trim().toLowerCase() === target; });
+    if (idx !== -1) {
+      var removed = invItems[idx];
+      invEquipped.weaponIds = invEquipped.weaponIds.filter(function(id){ return id !== removed.id; });
+      if (invEquipped.armorId === removed.id) invEquipped.armorId = null;
+      invEquipped.otherIds = (invEquipped.otherIds||[]).filter(function(id){ return id !== removed.id; });
+      invItems.splice(idx, 1);
+      return 'Removed ' + removed.name;
+    }
+    return null;
+  }
+  return null;
+}
+function invCheckMailbox() {
+  var seenKey = SAVE_KEY + '_mailbox_seen';
+  var seen; try { seen = JSON.parse(localStorage.getItem(seenKey)) || []; } catch(e) { seen = []; }
+  fetch('./items-mailbox.json?_=' + Date.now())
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data){
+      if (!data) return;
+      var notes = [];
+      var invTouched = false, sheetTouched = false;
+
+      (data.items || []).forEach(function(entry){
+        if (!entry.mailId || seen.indexOf(entry.mailId) !== -1) return;
+        var item = JSON.parse(JSON.stringify(entry));
+        delete item.mailId;
+        item.id = 'i' + Date.now() + Math.floor(Math.random()*1000);
+        invItems.push(item);
+        seen.push(entry.mailId);
+        notes.push(item.name);
+        invTouched = true;
+      });
+
+      (data.commands || []).forEach(function(cmd){
+        if (!cmd.cmdId || seen.indexOf(cmd.cmdId) !== -1) return;
+        seen.push(cmd.cmdId);
+        var result = invApplyDMCommand(cmd);
+        if (result) { notes.push(result); sheetTouched = true; if (cmd.type === 'removeItem') invTouched = true; }
+      });
+
+      if (invTouched) { invSave(); invRender(); invApplyPassives(); }
+      if (sheetTouched) { save(); }
+      if (notes.length) {
+        try { localStorage.setItem(seenKey, JSON.stringify(seen)); } catch(e) {}
+        showRestToast('From the DM', notes.join(', '));
+      }
+    })
+    .catch(function(){ /* offline, no mailbox file yet, or not on GitHub Pages — fine, just skip */ });
+}
+
 // ── INIT ──────────────────────────────────────
 load();
 loadNoteDocs();
@@ -3112,6 +3265,8 @@ loadActions();
 dsLoad();
 refreshZeroHidden();
 invInit();
+invCheckIncomingItem();
+invCheckMailbox();
 document.querySelectorAll('.locked-field').forEach(function(el){
   el.addEventListener('change', save);
   el.addEventListener('input',  save);
