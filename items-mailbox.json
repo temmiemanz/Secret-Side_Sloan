@@ -1,0 +1,50 @@
+{
+  "items": [
+    {
+      "mailId": "m17902674283061870",
+      "name": "Piercing Resonance",
+      "type": "Weapon",
+      "rarity": "Rare",
+      "value": "",
+      "weight": "0",
+      "qty": 1,
+      "stackable": false,
+      "desc": "Piercing Resonance is a simple weightless, translucent purple knife that appears to be jagged and more as if it was a piece of glass. The weapon is linked to its user (Sloan) and can only be used by the user (Sloan). The user also will always have access to it, being able to summon it to their hands at will.",
+      "notes": "",
+      "equippable": true,
+      "usable": false,
+      "consumable": false,
+      "uses": "",
+      "props": "Finesse, Weightless, Linked",
+      "weaponWt": "",
+      "twoHanded": false,
+      "ac": "",
+      "armorType": "Light",
+      "strReq": "",
+      "stealthDisadv": false,
+      "ammoDamage": "",
+      "ammoDmgType": "",
+      "effect": "",
+      "fx": {
+        "str": "",
+        "mnd": "",
+        "sol": "",
+        "def": ""
+      },
+      "conditions": [],
+      "customFields": [],
+      "actions": [
+        {
+          "name": "Strike",
+          "damage": "1d6",
+          "dmgType": "Slashing",
+          "range": "5 ft",
+          "damage2": "2",
+          "dmgType2": "",
+          "notes": "Strike the target with a basic attack"
+        }
+      ]
+    }
+  ],
+  "commands": []
+}
