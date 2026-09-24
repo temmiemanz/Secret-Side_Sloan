@@ -2,14 +2,14 @@
   "items": [
     {
       "mailId": "m17902674283061870",
-      "name": "Piercing Resonance",
+      "name": "Splinter",
       "type": "Weapon",
       "rarity": "Rare",
       "value": "",
       "weight": "0",
       "qty": 1,
       "stackable": false,
-      "desc": "Piercing Resonance is a simple weightless, translucent purple knife that appears to be jagged and more as if it was a piece of glass. The weapon is linked to its user (Sloan) and can only be used by the user (Sloan). The user also will always have access to it, being able to summon it to their hands at will.",
+      "desc": "A blade the color of a bruise, thin as broken glass and just as sharp along the edge. It doesn't weigh anything, not because it's small, but because it was never really here to begin with.\n\nShe doesn't remember making it. It's just always been there when she reached for it, waiting in whatever pocket of nothing she keeps it in. Only her hand can close around it. Anyone else's fingers just pass right through.",
       "notes": "",
       "equippable": true,
       "usable": false,
