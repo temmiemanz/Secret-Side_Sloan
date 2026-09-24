@@ -3218,6 +3218,18 @@ function invApplyDMCommand(cmd) {
     }
     return null;
   }
+  if (cmd.type === 'editItem') {
+    var matchTarget = (cmd.matchName || '').trim().toLowerCase();
+    var editIdx = invItems.findIndex(function(i){ return (i.name||'').trim().toLowerCase() === matchTarget; });
+    if (editIdx !== -1) {
+      var oldId = invItems[editIdx].id;
+      var updated = JSON.parse(JSON.stringify(cmd.item));
+      updated.id = oldId; // keep the same id so equip state and position survive
+      invItems[editIdx] = updated;
+      return 'Updated ' + updated.name;
+    }
+    return null;
+  }
   return null;
 }
 function invCheckMailbox() {
@@ -3245,7 +3257,7 @@ function invCheckMailbox() {
         if (!cmd.cmdId || seen.indexOf(cmd.cmdId) !== -1) return;
         seen.push(cmd.cmdId);
         var result = invApplyDMCommand(cmd);
-        if (result) { notes.push(result); sheetTouched = true; if (cmd.type === 'removeItem') invTouched = true; }
+        if (result) { notes.push(result); sheetTouched = true; if (cmd.type === 'removeItem' || cmd.type === 'editItem') invTouched = true; }
       });
 
       if (invTouched) { invSave(); invRender(); invApplyPassives(); }
